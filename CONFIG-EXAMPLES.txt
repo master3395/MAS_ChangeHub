@@ -1,0 +1,279 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║           CONFIGURATION EXAMPLES - snapshot_config.conf              ║
+║              Quick Reference for Common Scenarios                    ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📝 CONFIGURATION FILE LOCATION
+═══════════════════════════════════
+/home/MAS_ChangeHub/snapshot_config.conf
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 1: ALL DOMAINS, ONCE DAILY (Current Default)              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="all"
+CUSTOM_SCHEDULE_TIMES="23:00"
+AUTO_APPLY_SCHEDULE=false
+
+Result:
+• Snapshots all 15 domains
+• Runs at 23:00 GMT+2 daily
+• Managed via cron/schedule manager
+• 15 snapshots per day
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 2: MAIN DOMAIN ONLY, CUSTOM TIMES                         ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="main"
+MAIN_DOMAIN="https://newstargeted.com"
+CUSTOM_SCHEDULE_TIMES="09:00 13:00 17:00 21:00"
+AUTO_APPLY_SCHEDULE=true
+
+Result:
+• Snapshots only newstargeted.com
+• Runs at 09:00, 13:00, 17:00, 21:00 GMT+2
+• Auto-applied from config file
+• 4 snapshots per day
+
+How to apply:
+  cd /home/MAS_ChangeHub
+  ./apply_config_schedule.sh
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 3: SELECTED DOMAINS, EVERY 6 HOURS                        ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="custom"
+CUSTOM_DOMAINS=(
+    "https://newstargeted.com"
+    "https://api.newstargeted.com"
+    "https://mas.newstargeted.com"
+    "https://infoskjerm.newstargeted.com"
+)
+CUSTOM_SCHEDULE_TIMES="00:00 06:00 12:00 18:00"
+AUTO_APPLY_SCHEDULE=true
+
+Result:
+• Snapshots 4 selected domains
+• Runs every 6 hours (4x daily)
+• Auto-applied from config file
+• 16 snapshots per day (4 runs × 4 domains)
+
+How to apply:
+  cd /home/MAS_ChangeHub
+  ./apply_config_schedule.sh
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 4: ALL DOMAINS, TWICE DAILY                               ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="all"
+CUSTOM_SCHEDULE_TIMES="11:00 23:00"
+AUTO_APPLY_SCHEDULE=true
+
+Result:
+• Snapshots all 15 domains
+• Runs at 11:00 and 23:00 GMT+2
+• Auto-applied from config file
+• 30 snapshots per day (2 runs × 15 domains)
+
+How to apply:
+  cd /home/MAS_ChangeHub
+  ./apply_config_schedule.sh
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 5: BUSINESS HOURS ONLY (Selected Domains)                 ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="custom"
+CUSTOM_DOMAINS=(
+    "https://newstargeted.com"
+    "https://api.newstargeted.com"
+)
+CUSTOM_SCHEDULE_TIMES="09:00 12:00 15:00 18:00"
+AUTO_APPLY_SCHEDULE=true
+
+Result:
+• Snapshots 2 selected domains
+• Runs during business hours only
+• Auto-applied from config file
+• 8 snapshots per day (4 runs × 2 domains)
+
+Perfect for:
+  • Websites that only update during business hours
+  • Development/testing environments
+  • Reducing snapshot count
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ EXAMPLE 6: HIGH-FREQUENCY MONITORING                              ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+DOMAIN_SELECTION_MODE="custom"
+CUSTOM_DOMAINS=(
+    "https://newstargeted.com"
+)
+CUSTOM_SCHEDULE_TIMES="03:00 07:00 11:00 15:00 19:00 23:00"
+AUTO_APPLY_SCHEDULE=true
+
+Result:
+• Snapshots main domain only
+• Runs every 4 hours (6x daily)
+• Auto-applied from config file
+• 6 snapshots per day
+
+Perfect for:
+  • High-traffic websites
+  • Frequently updated content
+  • Critical monitoring
+
+⚠️ WARNING: Ensure you respect Internet Archive rate limits!
+
+
+══════════════════════════════════════════════════════════════════════
+QUICK COMMANDS
+══════════════════════════════════════════════════════════════════════
+
+1. EDIT CONFIGURATION
+   nano /home/MAS_ChangeHub/snapshot_config.conf
+
+2. APPLY CONFIGURATION
+   cd /home/MAS_ChangeHub
+   ./apply_config_schedule.sh
+
+3. TEST WITHOUT APPLYING
+   ./website_snapshot.sh
+
+4. CHECK CURRENT SETTINGS
+   cat snapshot_config.conf | grep "DOMAIN_SELECTION_MODE\|CUSTOM_SCHEDULE_TIMES\|AUTO_APPLY"
+
+5. VIEW ACTIVE CRON JOBS
+   crontab -l | grep MAS_ChangeHub
+
+6. CHECK LOGS
+   tail -f snapshot.log
+
+
+══════════════════════════════════════════════════════════════════════
+CONFIGURATION OPTIONS
+══════════════════════════════════════════════════════════════════════
+
+DOMAIN SELECTION:
+─────────────────
+• "all"     → All 15 domains (default)
+• "main"    → Only newstargeted.com
+• "custom"  → Selected domains from CUSTOM_DOMAINS array
+
+
+SCHEDULE OPTIONS:
+─────────────────
+• CUSTOM_SCHEDULE_TIMES → Hard-code times in config
+• AUTO_APPLY_SCHEDULE   → Use config-based scheduling
+
+  true  → Automatically apply schedule from config
+  false → Use schedule manager / manual cron
+
+
+TIME FORMAT:
+────────────
+• 24-hour format: HH:MM
+• Space-separated: "09:00 13:00 17:00"
+• Always in quotes: "23:00"
+
+
+══════════════════════════════════════════════════════════════════════
+IMPORTANT NOTES
+══════════════════════════════════════════════════════════════════════
+
+⚠️  RATE LIMITS
+   Internet Archive allows 1 snapshot per URL per hour.
+   Plan your schedule accordingly!
+
+⚠️  CONTABO CONFLICT
+   Contabo VM snapshots run at 00:00 GMT+2.
+   Keep at least one run at 23:00 for 1-hour separation.
+
+⚠️  DISCORD NOTIFICATIONS
+   Each run sends a separate Discord notification.
+   4x daily = 4 Discord messages per day.
+
+💡 TESTING
+   Always test with DOMAIN_SELECTION_MODE="main" first
+   before applying to all domains!
+
+
+══════════════════════════════════════════════════════════════════════
+STEP-BY-STEP GUIDE
+══════════════════════════════════════════════════════════════════════
+
+STEP 1: EDIT CONFIG FILE
+─────────────────────────
+nano /home/MAS_ChangeHub/snapshot_config.conf
+
+
+STEP 2: SET YOUR PREFERENCES
+─────────────────────────────
+# Example: Business hours, selected domains
+DOMAIN_SELECTION_MODE="custom"
+CUSTOM_DOMAINS=(
+    "https://newstargeted.com"
+    "https://api.newstargeted.com"
+)
+CUSTOM_SCHEDULE_TIMES="09:00 17:00"
+AUTO_APPLY_SCHEDULE=true
+
+
+STEP 3: APPLY CONFIGURATION
+────────────────────────────
+cd /home/MAS_ChangeHub
+./apply_config_schedule.sh
+
+
+STEP 4: VERIFY
+──────────────
+crontab -l | grep MAS_ChangeHub
+./website_snapshot.sh  # Test run
+
+
+STEP 5: MONITOR
+───────────────
+tail -f /home/MAS_ChangeHub/snapshot.log
+
+
+══════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+══════════════════════════════════════════════════════════════════════
+
+Problem: Changes not taking effect
+Solution: Check AUTO_APPLY_SCHEDULE=true and run apply_config_schedule.sh
+
+Problem: Wrong domains being snapshotted
+Solution: Check DOMAIN_SELECTION_MODE and verify array syntax
+
+Problem: Times not working
+Solution: Verify 24-hour format (HH:MM), quotes, and space separation
+
+
+══════════════════════════════════════════════════════════════════════
+DOCUMENTATION
+══════════════════════════════════════════════════════════════════════
+
+Full Guides:
+• CONFIG-FILE-GUIDE.md
+• SCHEDULE-FREQUENCY-GUIDE.md
+• README.md
+
+All located in: /home/MAS_ChangeHub/to-do/
+
+
+══════════════════════════════════════════════════════════════════════
+Created: 2025-10-12
+Version: 1.3
+════════════════════════════════════════════════════════════════════════
+

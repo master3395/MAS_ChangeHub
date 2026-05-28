@@ -1,0 +1,109 @@
+# Website Snapshot Configuration
+# Configuration file for daily website snapshots
+
+# Internet Archive API Configuration
+IA_ACCESS_KEY=""
+IA_SECRET_KEY=""
+IA_API_URL="https://web.archive.org/save/"
+
+# Logging Configuration
+LOG_LEVEL="INFO"
+LOG_RETENTION_DAYS=90
+BACKUP_RETENTION_DAYS=30
+
+# Request Configuration
+REQUEST_TIMEOUT=60
+CONNECT_TIMEOUT=30
+DELAY_BETWEEN_REQUESTS=5
+MAX_RETRIES=3
+RETRY_BASE_DELAY_SECONDS=120
+RATE_LIMIT_COOLDOWN_HOURS=12
+SKIP_IF_SNAPSHOT_WITHIN_HOURS=20
+FALLBACK_SIMPLE_ON_RATE_LIMIT=true
+
+# Internet Archive Enhanced Options
+CAPTURE_OUTLINKS=false
+CAPTURE_SCREENSHOT=false
+CAPTURE_ALL=false
+SKIP_FIRST_ARCHIVE=false
+EMAIL_RESULT=false
+WACZ_FILE=false
+
+# Notification Configuration (optional)
+ENABLE_NOTIFICATIONS=true
+NOTIFICATION_EMAIL="info@newstargeted.com"
+
+# Discord Webhook Configuration
+DISCORD_WEBHOOK_ENABLED=true
+DISCORD_NOTIFY_ON_FAILURE_ONLY=true
+DISCORD_NOTIFY_ON_SUCCESS=false
+DISCORD_WEBHOOK_URL=""
+
+# ═══════════════════════════════════════════════════════════════════════
+# SCHEDULE CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════
+
+# Snapshot Frequency (1, 2, 3, 4, 6, 24, or custom)
+SNAPSHOT_FREQUENCY=1
+
+# Custom Schedule Times (used when AUTO_APPLY_SCHEDULE=true)
+# Enter times in 24-hour format (HH:MM) separated by spaces
+# Example: "09:00 13:00 17:00 21:00"
+# For 24x daily (hourly): "00:00 01:00 02:00 03:00 04:00 05:00 06:00 07:00 08:00 09:00 10:00 11:00 12:00 13:00 14:00 15:00 16:00 17:00 18:00 19:00 20:00 21:00 22:00 23:00"
+CUSTOM_SCHEDULE_TIMES="03:00"
+
+# Auto-apply schedule from config (true/false)
+# If true: Uses CUSTOM_SCHEDULE_TIMES from this file
+# If false: Uses cron jobs set via schedule manager
+AUTO_APPLY_SCHEDULE=true
+
+# Pre-defined schedules (for reference only - not used if AUTO_APPLY_SCHEDULE=false):
+# 1x daily:  23:00 GMT+2
+# 2x daily:  11:00 GMT+2, 23:00 GMT+2 (12 hours apart)
+# 3x daily:  07:00 GMT+2, 15:00 GMT+2, 23:00 GMT+2 (8 hours apart)
+# 4x daily:  05:00 GMT+2, 11:00 GMT+2, 17:00 GMT+2, 23:00 GMT+2 (6 hours apart)
+# 6x daily:  05:00 GMT+2, 09:00 GMT+2, 13:00 GMT+2, 17:00 GMT+2, 21:00 GMT+2, 01:00 GMT+2 (4 hours apart)
+# 24x daily: Every hour from 00:00 to 23:00 GMT+2 (hourly snapshots - maximum frequency)
+
+# ═══════════════════════════════════════════════════════════════════════
+# DOMAIN SELECTION CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════════
+
+# Domain Selection Mode
+# Options: "all", "main", "custom"
+# - all: Snapshot all domains and sub-domains (default)
+# - main: Only snapshot the main domain (newstargeted.com)
+# - custom: Use CUSTOM_DOMAINS list below
+DOMAIN_SELECTION_MODE="main"
+
+# Main Domain (used when DOMAIN_SELECTION_MODE="main")
+MAIN_DOMAIN="https://newstargeted.com"
+
+# Custom Domains (only used when DOMAIN_SELECTION_MODE="custom")
+# Add your selected domains here, one per line
+CUSTOM_DOMAINS=(
+    "https://newstargeted.com"
+)
+
+# ═══════════════════════════════════════════════════════════════════════
+# ALL AVAILABLE DOMAINS
+# ═══════════════════════════════════════════════════════════════════════
+
+# Full list of all websites and sub-domains (used when DOMAIN_SELECTION_MODE="all")
+WEBSITES=(
+    "https://newstargeted.com"
+    "https://api.newstargeted.com"
+    "https://cmstest.newstargeted.com"
+    "https://console.newstargeted.com"
+    "https://convert.newstargeted.com"
+    "https://dashboard.newstargeted.com"
+    "https://diabetes.newstargeted.com"
+    "https://discord.newstargeted.com"
+    "https://extensions.newstargeted.com"
+    "https://infoskjerm.newstargeted.com"
+    "https://mas.newstargeted.com"
+    "https://rawdata.newstargeted.com"
+    "https://test.newstargeted.com"
+    "https://webhook.newstargeted.com"
+    "https://yourls.newstargeted.com"
+)

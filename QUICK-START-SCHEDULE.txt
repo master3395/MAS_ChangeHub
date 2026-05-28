@@ -1,0 +1,201 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║              QUICK START - SCHEDULE FREQUENCY MANAGER                ║
+║           Archive Snapshots - Multiple Runs Per Day                  ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📋 QUICK COMMANDS
+═════════════════
+
+1. VIEW CURRENT SCHEDULE
+   cd /home/MAS_ChangeHub
+   ./schedule_manager.sh --status
+
+2. CHANGE FREQUENCY (QUICK)
+   ./schedule_manager.sh --set 1    # Once daily (current)
+   ./schedule_manager.sh --set 2    # Twice daily
+   ./schedule_manager.sh --set 3    # 3 times daily
+   ./schedule_manager.sh --set 4    # 4 times daily
+   ./schedule_manager.sh --set 6    # 6 times daily
+
+3. INTERACTIVE MENU
+   ./schedule_manager.sh
+
+
+📅 PRE-DEFINED SCHEDULES
+═════════════════════════
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ 1x DAILY (Current Default)                                          │
+│ Times: 23:00 GMT+2                                                   │
+│ Use: Standard daily archiving                                        │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ 2x DAILY                                                             │
+│ Times: 11:00, 23:00 GMT+2 (12 hours apart)                          │
+│ Use: Business hours + evening coverage                               │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ 3x DAILY                                                             │
+│ Times: 07:00, 15:00, 23:00 GMT+2 (8 hours apart)                    │
+│ Use: Morning, afternoon, and evening coverage                        │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ 4x DAILY                                                             │
+│ Times: 05:00, 11:00, 17:00, 23:00 GMT+2 (6 hours apart)             │
+│ Use: Frequent content changes                                        │
+└──────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ 6x DAILY                                                             │
+│ Times: 05:00, 09:00, 13:00, 17:00, 21:00, 01:00 GMT+2               │
+│      (4 hours apart)                                                 │
+│ Use: High-frequency monitoring                                       │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+⚠️  IMPORTANT NOTES
+════════════════════
+
+1. RATE LIMITS
+   - Internet Archive allows 1 snapshot per URL per hour
+   - With 15 websites: Safe up to 6 runs per day
+   - More frequent = risk of some snapshots being skipped
+
+2. DISCORD NOTIFICATIONS
+   - Each run sends a separate notification
+   - 4x daily = 4 Discord messages per day
+   - Consider: Create dedicated channel for frequent updates
+
+3. CONTABO CONFLICT
+   - Contabo VM snapshots run at 00:00 GMT+2
+   - Keep at least one run at 23:00 GMT+2 (recommended)
+   - This maintains 1-hour separation
+
+4. LOG FILES
+   - More runs = more log entries
+   - Auto-cleanup: Logs older than 90 days deleted
+   - Check space: du -sh /home/MAS_ChangeHub/
+
+
+🎯 EXAMPLES
+════════════
+
+EXAMPLE 1: Enable Twice Daily
+────────────────────────────────
+cd /home/MAS_ChangeHub
+./schedule_manager.sh --set 2
+
+Result:
+✅ Snapshots at 11:00 and 23:00 GMT+2
+✅ 2 Discord notifications per day
+
+
+EXAMPLE 2: Custom Business Hours
+─────────────────────────────────
+cd /home/MAS_ChangeHub
+./schedule_manager.sh
+# Select option 6 (Custom schedule)
+# Enter: 09:00 13:00 17:00 21:00
+
+Result:
+✅ Snapshots at 09:00, 13:00, 17:00, 21:00 GMT+2
+✅ Only during business hours
+
+
+EXAMPLE 3: Check Current Schedule
+──────────────────────────────────
+cd /home/MAS_ChangeHub
+./schedule_manager.sh --status
+
+Output:
+📅 Current Schedule:
+✓ Scheduled at 23:00 GMT+2
+📊 Running 1 time(s) per day
+
+
+🔍 MONITORING
+═══════════════
+
+1. View Cron Jobs
+   crontab -l | grep MAS_ChangeHub
+
+2. Check Logs
+   tail -f /home/MAS_ChangeHub/snapshot.log
+
+3. Count Today's Runs
+   grep "Starting daily website snapshot process" \
+     /home/MAS_ChangeHub/snapshot.log | \
+     grep "$(date +%Y-%m-%d)" | wc -l
+
+4. Check System Status
+   cd /home/MAS_ChangeHub
+   ./check_snapshots.sh
+
+
+💡 RECOMMENDATIONS
+═══════════════════
+
+┌──────────────────────────────────────────────────────────────────────┐
+│ WEBSITE TYPE              │ RECOMMENDED FREQUENCY                    │
+├──────────────────────────────────────────────────────────────────────┤
+│ Static/Documentation      │ 1x daily (23:00)                         │
+│ Business Website          │ 2x daily (11:00, 23:00)                  │
+│ News/Blog                 │ 3x daily (07:00, 15:00, 23:00)           │
+│ E-commerce                │ 4x daily (05:00, 11:00, 17:00, 23:00)    │
+│ High-traffic/Development  │ 6x daily (05:00, 09:00, 13:00, 17:00, 21:00, 01:00) │
+└──────────────────────────────────────────────────────────────────────┘
+
+
+🛠️  TROUBLESHOOTING
+═══════════════════════
+
+Problem: Some snapshots failing with HTTP 429
+Solution: Reduce frequency or check rate limits
+  grep "HTTP 429" /home/MAS_ChangeHub/snapshot.log
+
+Problem: Too many Discord notifications
+Solution: Create dedicated Discord channel or reduce frequency
+
+Problem: Cron jobs not running
+Solution: Check cron service
+  systemctl status crond
+  journalctl -u crond -n 50
+
+
+📚 FULL DOCUMENTATION
+══════════════════════
+
+For complete documentation, see:
+  /home/MAS_ChangeHub/to-do/SCHEDULE-FREQUENCY-GUIDE.md
+
+
+🆘 QUICK HELP
+═══════════════
+
+Interactive Menu:
+  cd /home/MAS_ChangeHub
+  ./schedule_manager.sh
+
+Status Check:
+  ./schedule_manager.sh --status
+
+Change to Twice Daily:
+  ./schedule_manager.sh --set 2
+
+Disable All:
+  ./schedule_manager.sh
+  # Select option 7
+
+Test Run Now:
+  ./website_snapshot.sh
+
+
+════════════════════════════════════════════════════════════════════════
+Created: 2025-10-12
+Version: 1.2
+Support: Check logs and documentation in /home/MAS_ChangeHub/to-do/
+════════════════════════════════════════════════════════════════════════
+

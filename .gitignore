@@ -1,0 +1,16 @@
+# Secrets and local runtime (never commit)
+snapshot_config.conf
+config.php
+
+# Logs, state, backups
+snapshot.log
+*.log
+state/
+backups/
+*.bak.*
+*.bak
+
+# OS / editor
+.DS_Store
+*.swp
+*~
