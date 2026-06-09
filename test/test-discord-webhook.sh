@@ -1,11 +1,13 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
 
 echo "Testing Discord Webhook Integration..."
 echo "======================================"
 echo ""
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
 
 if [ -f "$CONFIG_FILE" ]; then
     # shellcheck source=/dev/null
@@ -44,7 +46,7 @@ with open(sys.argv[3], "w", encoding="utf-8") as handle:
     json.dump(payload, handle)
 ' "$DISCORD_WEBHOOK_URL" "$DISCORD_HERO_IMAGE_URL" "$payload_file"
 
-if php "$SCRIPT_DIR/lib/discord_cv2_send.php" < "$payload_file"; then
+if php "$MAS_CHANGEHUB_ROOT/lib/discord_cv2_send.php" < "$payload_file"; then
     echo "Test notification sent successfully."
     echo "Check your Discord channel for the CV2 message."
 else

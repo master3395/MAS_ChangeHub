@@ -4,12 +4,14 @@
 # This script tests the enhanced snapshot functionality with all available options
 
 echo "🧪 Testing Enhanced Internet Archive Snapshot Options"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
 echo "====================================================="
 echo ""
 
 # Configuration
-SCRIPT_DIR="/home/MAS_ChangeHub"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
 TEST_URL="https://newstargeted.com"
 
 echo "📋 Configuration Status:"

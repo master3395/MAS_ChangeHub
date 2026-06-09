@@ -3,9 +3,11 @@
 # Website Snapshot Status Checker
 # This script checks the status of website snapshots and provides reports
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-LOG_FILE="$SCRIPT_DIR/snapshot.log"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+LOG_FILE="$MAS_SNAPSHOT_LOG"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
 
 # Function to log messages
 log_message() {

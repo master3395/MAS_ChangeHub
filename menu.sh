@@ -3,8 +3,11 @@
 # Archive-Snapshots CLI Menu System
 # Interactive menu for managing website snapshots
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-LOG_FILE="$SCRIPT_DIR/snapshot.log"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+LOG_FILE="$MAS_SNAPSHOT_LOG"
+TEST_LOG_FILE="$MAS_TEST_SNAPSHOT_LOG"
 
 # Colors for better display
 RED='\033[0;31m'
@@ -39,38 +42,30 @@ show_menu() {
     echo -e "${GREEN}9.${NC} 📚 Help & Documentation"
     echo -e "${GREEN}10.${NC} 🔄 Refresh Status"
     echo -e "${PURPLE}11.${NC} 🖥️  Run Contabo Snapshot Now"
-    echo -e "${PURPLE}12.${NC} 📣 Test Contabo Discord Webhook"
-    echo -e "${PURPLE}13.${NC} 📋 View Contabo Logs"
-    echo -e "${PURPLE}14.${NC} ⏰ Apply Contabo Cron Schedule"
+    echo -e "${PURPLE}12.${NC} 📋 View Contabo Logs"
+    echo -e "${PURPLE}13.${NC} ⏰ Apply Contabo Cron Schedule"
     echo -e "${RED}0.${NC} 🚪 Exit"
     echo
-    echo -n -e "${BLUE}Enter your choice [0-14]: ${NC}"
+    echo -n -e "${BLUE}Enter your choice [0-13]: ${NC}"
 }
 
 run_contabo_snapshot() {
     echo -e "${YELLOW}Running Contabo snapshot manager...${NC}"
-    php "$SCRIPT_DIR/contabo/snapshot-manager.php"
-    echo
-    read -p "Press Enter to continue..."
-}
-
-test_contabo_discord() {
-    echo -e "${YELLOW}Sending Contabo Discord test...${NC}"
-    php "$SCRIPT_DIR/contabo/test-discord-webhook.php"
+    php "$MAS_CHANGEHUB_ROOT/contabo/snapshot-manager.php"
     echo
     read -p "Press Enter to continue..."
 }
 
 view_contabo_logs() {
     echo -e "${YELLOW}Contabo snapshot logs:${NC}"
-    tail -n 40 "$SCRIPT_DIR/contabo/logs/snapshot-manager.log" 2>/dev/null || echo "No log file yet."
+    tail -n 40 "$MAS_CHANGEHUB_ROOT/contabo/logs/snapshot-manager.log" 2>/dev/null || echo "No log file yet."
     echo
     read -p "Press Enter to continue..."
 }
 
 apply_contabo_cron() {
     echo -e "${YELLOW}Applying Contabo cron from config.php...${NC}"
-    "$SCRIPT_DIR/contabo/apply_config_schedule.sh"
+    "$MAS_CHANGEHUB_ROOT/contabo/apply_config_schedule.sh"
     echo
     read -p "Press Enter to continue..."
 }
@@ -79,7 +74,7 @@ apply_contabo_cron() {
 run_snapshot() {
     echo -e "${YELLOW}🚀 Running snapshot process...${NC}"
     echo
-    $SCRIPT_DIR/website_snapshot.sh
+    $MAS_CHANGEHUB_ROOT/website_snapshot.sh
     echo
     echo -e "${GREEN}✅ Snapshot process completed!${NC}"
     read -p "Press Enter to continue..."
@@ -199,21 +194,93 @@ run_manual_snapshot() {
     done
 }
 
-# Function to test system
-test_system() {
-    echo -e "${YELLOW}🧪 Testing system...${NC}"
-    echo
-    $SCRIPT_DIR/test_snapshot.sh
-    echo
-    echo -e "${GREEN}✅ System test completed!${NC}"
-    read -p "Press Enter to continue..."
+# Tests and diagnostics (all scripts live under test/)
+test_menu() {
+    while true; do
+        clear
+        show_header
+        echo -e "${YELLOW}🧪 TESTS & DIAGNOSTICS:${NC}"
+        echo -e "${GREEN}1.${NC} Archive system test"
+        echo -e "${GREEN}2.${NC} Archive Discord webhook (CV2)"
+        echo -e "${GREEN}3.${NC} Enhanced snapshot options"
+        echo -e "${GREEN}4.${NC} Manual snapshot smoke test"
+        echo -e "${GREEN}5.${NC} Wayback Machine links"
+        echo -e "${PURPLE}6.${NC} Contabo Discord webhook (CV2)"
+        echo -e "${PURPLE}7.${NC} Contabo snapshot API"
+        echo -e "${PURPLE}8.${NC} Contabo snapshot manager run"
+        echo -e "${PURPLE}9.${NC} Contabo delete API (destructive)"
+        echo -e "${RED}0.${NC} Back to main menu"
+        echo
+        echo -n -e "${BLUE}Enter your choice [0-9]: ${NC}"
+        read test_choice
+
+        case $test_choice in
+            1)
+                echo -e "${YELLOW}Running archive system test...${NC}"
+                echo
+                "$MAS_TEST_DIR/test_snapshot.sh"
+                ;;
+            2)
+                echo -e "${YELLOW}Testing archive Discord webhook...${NC}"
+                echo
+                "$MAS_TEST_DIR/test-discord-webhook.sh"
+                ;;
+            3)
+                echo -e "${YELLOW}Testing enhanced snapshot options...${NC}"
+                echo
+                "$MAS_TEST_DIR/test_enhanced_snapshot.sh"
+                ;;
+            4)
+                echo -e "${YELLOW}Running manual snapshot smoke test...${NC}"
+                echo
+                "$MAS_TEST_DIR/test_manual_snapshot.sh"
+                ;;
+            5)
+                echo -e "${YELLOW}Testing Wayback Machine links...${NC}"
+                echo
+                "$MAS_TEST_DIR/test_wayback_links.sh"
+                ;;
+            6)
+                echo -e "${YELLOW}Testing Contabo Discord webhook...${NC}"
+                echo
+                php "$MAS_TEST_CONTABO_DIR/test-discord-webhook.php"
+                ;;
+            7)
+                echo -e "${YELLOW}Testing Contabo snapshot API...${NC}"
+                echo
+                php "$MAS_TEST_CONTABO_DIR/test-snapshot-api.php"
+                ;;
+            8)
+                echo -e "${YELLOW}Running Contabo snapshot manager test...${NC}"
+                echo
+                "$MAS_TEST_CONTABO_DIR/test-snapshots.sh"
+                ;;
+            9)
+                echo -e "${RED}Warning: this exercises Contabo snapshot delete API.${NC}"
+                read -p "Continue? [y/N]: " confirm
+                if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                    php "$MAS_TEST_CONTABO_DIR/test-delete.php"
+                else
+                    echo "Skipped."
+                fi
+                ;;
+            0)
+                break
+                ;;
+            *)
+                echo -e "${RED}Invalid choice!${NC}"
+                ;;
+        esac
+        echo
+        read -p "Press Enter to continue..."
+    done
 }
 
 # Function to check status
 check_status() {
     echo -e "${YELLOW}📊 Checking system status...${NC}"
     echo
-    $SCRIPT_DIR/check_snapshots.sh
+    "$MAS_ARCHIVE_DIR/check_snapshots.sh"
     echo
     read -p "Press Enter to continue..."
 }
@@ -245,18 +312,18 @@ manage_cron() {
                 ;;
             2)
                 # Launch schedule manager
-                $SCRIPT_DIR/schedule_manager.sh
+                "$MAS_ARCHIVE_DIR/schedule_manager.sh"
                 ;;
             3)
                 # Apply schedule from config file
                 echo
-                $SCRIPT_DIR/apply_config_schedule.sh
+                "$MAS_ARCHIVE_DIR/apply_config_schedule.sh"
                 echo
                 read -p "Press Enter to continue..."
                 ;;
             4)
                 echo -e "${YELLOW}Enabling daily snapshot at 23:00...${NC}"
-                (crontab -l 2>/dev/null | grep -v MAS_ChangeHub; echo "0 23 * * * $SCRIPT_DIR/website_snapshot.sh >> $LOG_FILE 2>&1  # Archive snapshot 1x daily") | crontab -
+                (crontab -l 2>/dev/null | grep -v MAS_ChangeHub; echo "0 23 * * * $MAS_CHANGEHUB_ROOT/website_snapshot.sh >> $LOG_FILE 2>&1  # Archive snapshot 1x daily") | crontab -
                 echo -e "${GREEN}✅ Daily snapshot enabled at 23:00 GMT+2!${NC}"
                 read -p "Press Enter to continue..."
                 ;;
@@ -269,7 +336,7 @@ manage_cron() {
             6)
                 echo -e "${YELLOW}Testing cron job (running snapshot now)...${NC}"
                 echo
-                $SCRIPT_DIR/website_snapshot.sh
+                $MAS_CHANGEHUB_ROOT/website_snapshot.sh
                 echo
                 echo -e "${GREEN}✅ Test completed!${NC}"
                 read -p "Press Enter to continue..."
@@ -398,7 +465,7 @@ view_snapshots() {
                 ;;
             3)
                 echo -e "${YELLOW}Cleaning old logs (older than 90 days)...${NC}"
-                find $SCRIPT_DIR -name "*.log" -mtime +90 -delete
+                find "$MAS_LOG_DIR" -name "*.log" -mtime +90 -delete
                 echo -e "${GREEN}✅ Old logs cleaned!${NC}"
                 read -p "Press Enter to continue..."
                 ;;
@@ -445,7 +512,7 @@ view_logs() {
             3)
                 echo -e "${YELLOW}Test Log:${NC}"
                 echo "=========="
-                cat $SCRIPT_DIR/test_snapshot.log
+                cat "$TEST_LOG_FILE"
                 echo
                 read -p "Press Enter to continue..."
                 ;;
@@ -461,7 +528,7 @@ view_logs() {
             5)
                 echo -e "${YELLOW}Clearing logs...${NC}"
                 > $LOG_FILE
-                > $SCRIPT_DIR/test_snapshot.log
+                > "$TEST_LOG_FILE"
                 echo -e "${GREEN}✅ Logs cleared!${NC}"
                 read -p "Press Enter to continue..."
                 ;;
@@ -483,9 +550,9 @@ show_config() {
     echo -e "${YELLOW}⚙️  CONFIGURATION:${NC}"
     echo "================"
     echo
-    echo -e "${GREEN}Script Directory:${NC} $SCRIPT_DIR"
-    echo -e "${GREEN}Log File:${NC} $LOG_FILE"
-    echo -e "${GREEN}Config File:${NC} $SCRIPT_DIR/snapshot_config.conf"
+    echo -e "${GREEN}Project root:${NC} $MAS_CHANGEHUB_ROOT"
+    echo -e "${GREEN}Log file:${NC} $LOG_FILE"
+    echo -e "${GREEN}Config file:${NC} $MAS_SNAPSHOT_CONFIG"
     echo
     echo -e "${GREEN}Current Cron Job:${NC}"
     crontab -l | grep MAS_ChangeHub || echo "No cron job configured"
@@ -494,7 +561,7 @@ show_config() {
     timedatectl status | grep "Time zone"
     echo
     echo -e "${GREEN}Websites to Snapshot:${NC}"
-    grep -A 20 "WEBSITES=(" $SCRIPT_DIR/website_snapshot.sh | grep "https://" | sed 's/^[[:space:]]*/  /'
+    grep -A 20 "WEBSITES=(" $MAS_CHANGEHUB_ROOT/website_snapshot.sh | grep "https://" | sed 's/^[[:space:]]*/  /'
     echo
     read -p "Press Enter to continue..."
 }
@@ -519,12 +586,12 @@ show_help() {
     echo
     echo -e "${GREEN}Quick Commands:${NC}"
     echo "• Run snapshot: ./website_snapshot.sh"
-    echo "• Test system: ./test_snapshot.sh"
-    echo "• Check status: ./check_snapshots.sh"
+    echo "• Tests: menu option 3 (all scripts in test/)"
+    echo "• Check status: ./archive/check_snapshots.sh"
     echo
     echo -e "${GREEN}Documentation:${NC}"
     echo "• README: cat README.md"
-    echo "• Config: cat snapshot_config.conf"
+    echo "• Config: cat config/snapshot_config.conf"
     echo
     read -p "Press Enter to continue..."
 }
@@ -532,7 +599,7 @@ show_help() {
 # Function to refresh status
 refresh_status() {
     echo -e "${YELLOW}🔄 Refreshing status...${NC}"
-    $SCRIPT_DIR/check_snapshots.sh
+    "$MAS_ARCHIVE_DIR/check_snapshots.sh"
     echo
     read -p "Press Enter to continue..."
 }
@@ -547,7 +614,7 @@ main() {
         case $choice in
             1) run_snapshot ;;
             2) run_manual_snapshot ;;
-            3) test_system ;;
+            3) test_menu ;;
             4) check_status ;;
             5) manage_cron ;;
             6) view_snapshots ;;
@@ -556,9 +623,8 @@ main() {
             9) show_help ;;
             10) refresh_status ;;
             11) run_contabo_snapshot ;;
-            12) test_contabo_discord ;;
-            13) view_contabo_logs ;;
-            14) apply_contabo_cron ;;
+            12) view_contabo_logs ;;
+            13) apply_contabo_cron ;;
             0) 
                 echo -e "${GREEN}👋 Goodbye!${NC}"
                 exit 0

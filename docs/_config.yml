@@ -1,0 +1,16 @@
+title: MAS ChangeHub
+description: Unified Internet Archive and Contabo snapshot tooling for NewsTargeted
+theme: jekyll-theme-cayman
+show_downloads: true
+
+github:
+  repository_url: https://github.com/master3395/MAS_ChangeHub
+
+plugins:
+  - jekyll-relative-links
+
+relative_links:
+  enabled: true
+  collections: true
+
+markdown: GFM

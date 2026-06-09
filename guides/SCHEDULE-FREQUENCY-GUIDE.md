@@ -11,18 +11,18 @@ The MAS_ChangeHub system now supports running multiple times per day with flexib
 ```bash
 # Launch the interactive schedule manager
 cd /home/MAS_ChangeHub
-./schedule_manager.sh
+./archive/schedule_manager.sh
 ```
 
 ### Quick Commands
 
 ```bash
 # View current schedule
-./schedule_manager.sh --status
+./archive/schedule_manager.sh --status
 
 # Set frequency quickly (1, 2, 3, 4, or 6)
-./schedule_manager.sh --set 2    # Run twice daily
-./schedule_manager.sh --set 4    # Run 4 times daily
+./archive/schedule_manager.sh --set 2    # Run twice daily
+./archive/schedule_manager.sh --set 4    # Run 4 times daily
 ```
 
 ## Pre-Defined Schedules
@@ -35,7 +35,7 @@ cd /home/MAS_ChangeHub
 
 ```bash
 # Set via schedule manager
-./schedule_manager.sh --set 1
+./archive/schedule_manager.sh --set 1
 ```
 
 ### 2. Twice Daily
@@ -46,7 +46,7 @@ cd /home/MAS_ChangeHub
 
 ```bash
 # Set via schedule manager
-./schedule_manager.sh --set 2
+./archive/schedule_manager.sh --set 2
 ```
 
 ### 3. Three Times Daily
@@ -57,7 +57,7 @@ cd /home/MAS_ChangeHub
 
 ```bash
 # Set via schedule manager
-./schedule_manager.sh --set 3
+./archive/schedule_manager.sh --set 3
 ```
 
 ### 4. Four Times Daily
@@ -68,7 +68,7 @@ cd /home/MAS_ChangeHub
 
 ```bash
 # Set via schedule manager
-./schedule_manager.sh --set 4
+./archive/schedule_manager.sh --set 4
 ```
 
 ### 5. Six Times Daily
@@ -79,7 +79,7 @@ cd /home/MAS_ChangeHub
 
 ```bash
 # Set via schedule manager
-./schedule_manager.sh --set 6
+./archive/schedule_manager.sh --set 6
 ```
 
 ## Custom Schedules
@@ -87,7 +87,7 @@ cd /home/MAS_ChangeHub
 You can create completely custom schedules with any times you want:
 
 ### Via Schedule Manager
-1. Run `./schedule_manager.sh`
+1. Run `./archive/schedule_manager.sh`
 2. Select option `6` for "Custom schedule"
 3. Enter times in 24-hour format separated by spaces
 4. Example: `06:00 12:00 18:00 23:00`
@@ -98,9 +98,9 @@ You can create completely custom schedules with any times you want:
 crontab -e
 
 # Add custom entries (example: 8AM, 2PM, 10PM)
-0 8 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1
-0 14 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1
-0 22 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1
+0 8 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/logs/snapshot.log 2>&1
+0 14 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/logs/snapshot.log 2>&1
+0 22 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/logs/snapshot.log 2>&1
 ```
 
 ## Important Considerations
@@ -130,7 +130,7 @@ crontab -e
 
 ## Configuration File
 
-The schedule frequency is stored in `/home/MAS_ChangeHub/snapshot_config.conf`:
+The schedule frequency is stored in `/home/MAS_ChangeHub/config/snapshot_config.conf`:
 
 ```bash
 # Schedule Configuration
@@ -150,10 +150,10 @@ crontab -l | grep MAS_ChangeHub
 ### Check Execution Logs
 ```bash
 # View recent executions
-grep "Starting daily website snapshot process" /home/MAS_ChangeHub/snapshot.log
+grep "Starting daily website snapshot process" /home/MAS_ChangeHub/logs/snapshot.log
 
 # Count runs per day
-grep "Starting daily website snapshot process" /home/MAS_ChangeHub/snapshot.log | grep "$(date +%Y-%m-%d)" | wc -l
+grep "Starting daily website snapshot process" /home/MAS_ChangeHub/logs/snapshot.log | grep "$(date +%Y-%m-%d)" | wc -l
 ```
 
 ### Discord Notifications
@@ -215,8 +215,8 @@ Cron mail: set `MAILTO=""` in crontab; logging goes to `snapshot.log`.
 
 ```bash
 # Check for 429 errors (rate limit)
-grep "HTTP 429" /home/MAS_ChangeHub/snapshot.log
-grep "Rate limit cooldown" /home/MAS_ChangeHub/snapshot.log | tail -5
+grep "HTTP 429" /home/MAS_ChangeHub/logs/snapshot.log
+grep "Rate limit cooldown" /home/MAS_ChangeHub/logs/snapshot.log | tail -5
 ```
 
 ### Problem: Too many Discord notifications
@@ -225,7 +225,7 @@ grep "Rate limit cooldown" /home/MAS_ChangeHub/snapshot.log | tail -5
 2. Or disable Discord notifications for some runs:
 ```bash
 # Edit config file
-nano /home/MAS_ChangeHub/snapshot_config.conf
+nano /home/MAS_ChangeHub/config/snapshot_config.conf
 
 # Change:
 DISCORD_WEBHOOK_ENABLED=false  # For specific runs
@@ -253,7 +253,7 @@ crontab -l | grep MAS_ChangeHub
 crontab -l | grep -v MAS_ChangeHub | crontab -
 
 # Then reconfigure using schedule manager
-./schedule_manager.sh
+./archive/schedule_manager.sh
 ```
 
 ## Integration with Contabo Snapshots
@@ -300,16 +300,16 @@ Example: 4x daily
 
 ### Step 1: Check Current Schedule
 ```bash
-./schedule_manager.sh --status
+./archive/schedule_manager.sh --status
 ```
 
 ### Step 2: Choose New Frequency
 ```bash
 # Interactive
-./schedule_manager.sh
+./archive/schedule_manager.sh
 
 # Or quick set
-./schedule_manager.sh --set 2  # For twice daily
+./archive/schedule_manager.sh --set 2  # For twice daily
 ```
 
 ### Step 3: Verify New Schedule
@@ -324,7 +324,7 @@ crontab -l | grep MAS_ChangeHub
 ### Step 4: Monitor First Few Runs
 ```bash
 # Watch logs in real-time
-tail -f /home/MAS_ChangeHub/snapshot.log
+tail -f /home/MAS_ChangeHub/logs/snapshot.log
 
 # Check Discord notifications
 ```
@@ -334,7 +334,7 @@ tail -f /home/MAS_ChangeHub/snapshot.log
 ### Example 1: Enable Twice Daily (Quick)
 ```bash
 cd /home/MAS_ChangeHub
-./schedule_manager.sh --set 2
+./archive/schedule_manager.sh --set 2
 ```
 
 Output:
@@ -347,7 +347,7 @@ Output:
 ### Example 2: Custom Business Hours Schedule
 ```bash
 cd /home/MAS_ChangeHub
-./schedule_manager.sh
+./archive/schedule_manager.sh
 
 # Choose option 6 (Custom schedule)
 # Enter: 09:00 13:00 17:00 21:00
@@ -366,7 +366,7 @@ Output:
 ### Example 3: Disable All Schedules
 ```bash
 cd /home/MAS_ChangeHub
-./schedule_manager.sh
+./archive/schedule_manager.sh
 
 # Choose option 7 (Disable all schedules)
 ```
@@ -383,17 +383,17 @@ Output:
 ### Schedule Manager Commands
 ```bash
 # Interactive menu
-./schedule_manager.sh
+./archive/schedule_manager.sh
 
 # View current schedule
-./schedule_manager.sh --status
+./archive/schedule_manager.sh --status
 
 # Quick set frequency
-./schedule_manager.sh --set 1   # Once daily
-./schedule_manager.sh --set 2   # Twice daily
-./schedule_manager.sh --set 3   # 3x daily
-./schedule_manager.sh --set 4   # 4x daily
-./schedule_manager.sh --set 6   # 6x daily
+./archive/schedule_manager.sh --set 1   # Once daily
+./archive/schedule_manager.sh --set 2   # Twice daily
+./archive/schedule_manager.sh --set 3   # 3x daily
+./archive/schedule_manager.sh --set 4   # 4x daily
+./archive/schedule_manager.sh --set 6   # 6x daily
 ```
 
 ### Direct Cron Commands
@@ -405,23 +405,23 @@ crontab -l | grep MAS_ChangeHub
 crontab -l | grep -v MAS_ChangeHub | crontab -
 
 # Add single cron entry
-(crontab -l; echo "0 23 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1") | crontab -
+(crontab -l; echo "0 23 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/logs/snapshot.log 2>&1") | crontab -
 ```
 
 ### Monitoring Commands
 ```bash
 # Check snapshot status
 cd /home/MAS_ChangeHub
-./check_snapshots.sh
+./archive/check_snapshots.sh
 
 # View recent logs
-tail -50 /home/MAS_ChangeHub/snapshot.log
+tail -50 /home/MAS_ChangeHub/logs/snapshot.log
 
 # Count today's runs
-grep "Starting daily website snapshot process" /home/MAS_ChangeHub/snapshot.log | grep "$(date +%Y-%m-%d)" | wc -l
+grep "Starting daily website snapshot process" /home/MAS_ChangeHub/logs/snapshot.log | grep "$(date +%Y-%m-%d)" | wc -l
 
 # Check for errors
-grep "❌" /home/MAS_ChangeHub/snapshot.log | tail -20
+grep "❌" /home/MAS_ChangeHub/logs/snapshot.log | tail -20
 ```
 
 ## Best Practices Summary
@@ -440,9 +440,9 @@ grep "❌" /home/MAS_ChangeHub/snapshot.log | tail -20
 ## Support
 
 For issues or questions:
-1. Run `./check_snapshots.sh` to check system status
-2. Run `./schedule_manager.sh --status` to view schedule
-3. Check logs: `tail -f /home/MAS_ChangeHub/snapshot.log`
+1. Run `./archive/check_snapshots.sh` to check system status
+2. Run `./archive/schedule_manager.sh --status` to view schedule
+3. Check logs: `tail -f /home/MAS_ChangeHub/logs/snapshot.log`
 4. Review Discord notifications for errors
 5. Check Internet Archive rate limits if seeing 429 errors
 

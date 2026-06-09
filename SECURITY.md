@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest `main` branch is supported. Deploy the current release on your server after pulling updates.
+Only the latest `master` branch is supported. Deploy the current release on your server after pulling updates.
 
 ## Reporting a vulnerability
 

@@ -31,7 +31,7 @@ Examples:
 STEP 3: Apply the Configuration
 ────────────────────────────────
 cd /home/contabo-snapshots
-./apply_config_schedule.sh
+./archive/apply_config_schedule.sh
 
 DONE! ✅ The cron job is automatically updated.
 
@@ -65,7 +65,7 @@ View Current Schedule:
 Edit Schedule:
   nano /home/contabo-snapshots/config.php
   # Change SNAPSHOT_TIME
-  ./apply_config_schedule.sh
+  ./archive/apply_config_schedule.sh
 
 View Logs:
   tail -f /home/contabo-snapshots/logs/snapshot-manager.log
@@ -111,7 +111,7 @@ Example 1: Change to 2:00 AM
 1. nano /home/contabo-snapshots/config.php
 2. Change: define('SNAPSHOT_TIME', '02:00');
 3. Save and exit (Ctrl+X, Y, Enter)
-4. Run: ./apply_config_schedule.sh
+4. Run: ./archive/apply_config_schedule.sh
 
 Result: Contabo snapshots will run at 02:00 GMT+2
 
@@ -121,7 +121,7 @@ Example 2: Change to 3:30 AM
 1. nano /home/contabo-snapshots/config.php
 2. Change: define('SNAPSHOT_TIME', '03:30');
 3. Save and exit
-4. Run: ./apply_config_schedule.sh
+4. Run: ./archive/apply_config_schedule.sh
 
 Result: Contabo snapshots will run at 03:30 GMT+2
 
@@ -169,7 +169,7 @@ TROUBLESHOOTING
 Problem: Schedule not changing
 Solution: Make sure AUTO_APPLY_SCHEDULE is true and run apply script
   grep "AUTO_APPLY_SCHEDULE" /home/contabo-snapshots/config.php
-  ./apply_config_schedule.sh
+  ./archive/apply_config_schedule.sh
 
 Problem: Cron not running
 Solution: Check cron service
@@ -202,12 +202,12 @@ Both systems now use config-based scheduling:
 Internet Archive:
   Config: /home/archive-snapshots/snapshot_config.conf
   Times: 00:00 and 12:00 GMT+2
-  Apply: cd /home/archive-snapshots && ./apply_config_schedule.sh
+  Apply: cd /home/archive-snapshots && ./archive/apply_config_schedule.sh
 
 Contabo VM:
   Config: /home/contabo-snapshots/config.php
   Time: 01:00 GMT+2
-  Apply: cd /home/contabo-snapshots && ./apply_config_schedule.sh
+  Apply: cd /home/contabo-snapshots && ./archive/apply_config_schedule.sh
 
 
 ════════════════════════════════════════════════════════════════════════

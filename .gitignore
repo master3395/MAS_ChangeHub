@@ -1,18 +1,21 @@
 # Secrets and local runtime (never commit)
-snapshot_config.conf
+config/snapshot_config.conf
 config.php
 contabo/config.php
 contabo/logs/
 
 # Logs, state, backups
-snapshot.log
+logs/*
+!logs/.gitkeep
 *.log
 state/
 backups/
+test/test_backups/
 *.bak.*
 *.bak
 
 # OS / editor
 .DS_Store
+.cursor/
 *.swp
 *~

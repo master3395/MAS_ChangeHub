@@ -5,7 +5,7 @@
 
 📝 CONFIGURATION FILE LOCATION
 ═══════════════════════════════════
-/home/MAS_ChangeHub/snapshot_config.conf
+/home/MAS_ChangeHub/config/snapshot_config.conf
 
 
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -40,7 +40,7 @@ Result:
 
 How to apply:
   cd /home/MAS_ChangeHub
-  ./apply_config_schedule.sh
+  ./archive/apply_config_schedule.sh
 
 
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -65,7 +65,7 @@ Result:
 
 How to apply:
   cd /home/MAS_ChangeHub
-  ./apply_config_schedule.sh
+  ./archive/apply_config_schedule.sh
 
 
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -84,7 +84,7 @@ Result:
 
 How to apply:
   cd /home/MAS_ChangeHub
-  ./apply_config_schedule.sh
+  ./archive/apply_config_schedule.sh
 
 
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
@@ -141,11 +141,11 @@ QUICK COMMANDS
 ══════════════════════════════════════════════════════════════════════
 
 1. EDIT CONFIGURATION
-   nano /home/MAS_ChangeHub/snapshot_config.conf
+   nano /home/MAS_ChangeHub/config/snapshot_config.conf
 
 2. APPLY CONFIGURATION
    cd /home/MAS_ChangeHub
-   ./apply_config_schedule.sh
+   ./archive/apply_config_schedule.sh
 
 3. TEST WITHOUT APPLYING
    ./website_snapshot.sh
@@ -214,7 +214,7 @@ STEP-BY-STEP GUIDE
 
 STEP 1: EDIT CONFIG FILE
 ─────────────────────────
-nano /home/MAS_ChangeHub/snapshot_config.conf
+nano /home/MAS_ChangeHub/config/snapshot_config.conf
 
 
 STEP 2: SET YOUR PREFERENCES
@@ -232,7 +232,7 @@ AUTO_APPLY_SCHEDULE=true
 STEP 3: APPLY CONFIGURATION
 ────────────────────────────
 cd /home/MAS_ChangeHub
-./apply_config_schedule.sh
+./archive/apply_config_schedule.sh
 
 
 STEP 4: VERIFY
@@ -243,7 +243,7 @@ crontab -l | grep MAS_ChangeHub
 
 STEP 5: MONITOR
 ───────────────
-tail -f /home/MAS_ChangeHub/snapshot.log
+tail -f /home/MAS_ChangeHub/logs/snapshot.log
 
 
 ══════════════════════════════════════════════════════════════════════

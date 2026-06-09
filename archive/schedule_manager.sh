@@ -3,10 +3,12 @@
 # Schedule Manager for Internet Archive Snapshot System
 # Allows easy configuration of snapshot frequency
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
-SNAPSHOT_SCRIPT="$SCRIPT_DIR/website_snapshot.sh"
-LOG_FILE="$SCRIPT_DIR/snapshot.log"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
+SNAPSHOT_SCRIPT="$MAS_SNAPSHOT_SCRIPT"
+LOG_FILE="$MAS_SNAPSHOT_LOG"
 
 # Colors
 RED='\033[0;31m'

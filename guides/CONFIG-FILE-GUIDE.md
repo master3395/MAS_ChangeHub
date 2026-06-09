@@ -7,7 +7,7 @@ The `snapshot_config.conf` file provides complete control over your archive snap
 ## Location
 
 ```bash
-/home/MAS_ChangeHub/snapshot_config.conf
+/home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 ## Key Features
@@ -268,7 +268,7 @@ CUSTOM_DOMAINS=(
 
 1. **Edit the config file:**
 ```bash
-nano /home/MAS_ChangeHub/snapshot_config.conf
+nano /home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 2. **Set your preferences:**
@@ -281,7 +281,7 @@ DOMAIN_SELECTION_MODE="custom"
 3. **Apply the configuration:**
 ```bash
 cd /home/MAS_ChangeHub
-./apply_config_schedule.sh
+./archive/apply_config_schedule.sh
 ```
 
 ### Method 2: Via Menu
@@ -328,13 +328,13 @@ crontab -l | grep MAS_ChangeHub
 
 ```bash
 # View logs
-tail -f /home/MAS_ChangeHub/snapshot.log
+tail -f /home/MAS_ChangeHub/logs/snapshot.log
 
 # Check what was snapshotted
-grep "Processing:" /home/MAS_ChangeHub/snapshot.log | tail -20
+grep "Processing:" /home/MAS_ChangeHub/logs/snapshot.log | tail -20
 
 # Check domain mode
-grep "Domain mode:" /home/MAS_ChangeHub/snapshot.log | tail -5
+grep "Domain mode:" /home/MAS_ChangeHub/logs/snapshot.log | tail -5
 ```
 
 ## Troubleshooting
@@ -343,30 +343,30 @@ grep "Domain mode:" /home/MAS_ChangeHub/snapshot.log | tail -5
 
 **Solution 1:** Check AUTO_APPLY_SCHEDULE
 ```bash
-grep "AUTO_APPLY_SCHEDULE" /home/MAS_ChangeHub/snapshot_config.conf
+grep "AUTO_APPLY_SCHEDULE" /home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 If false, run:
 ```bash
-./apply_config_schedule.sh
+./archive/apply_config_schedule.sh
 ```
 
 **Solution 2:** Verify syntax
 ```bash
 # Test config loading
-bash -n /home/MAS_ChangeHub/snapshot_config.conf
+bash -n /home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 ### Problem: Custom domains not being snapshotted
 
 **Check domain mode:**
 ```bash
-grep "DOMAIN_SELECTION_MODE" /home/MAS_ChangeHub/snapshot_config.conf
+grep "DOMAIN_SELECTION_MODE" /home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 **Check custom domains list:**
 ```bash
-grep -A10 "CUSTOM_DOMAINS=" /home/MAS_ChangeHub/snapshot_config.conf
+grep -A10 "CUSTOM_DOMAINS=" /home/MAS_ChangeHub/config/snapshot_config.conf
 ```
 
 **Test manually:**
@@ -416,7 +416,7 @@ CUSTOM_DOMAINS=(
 ### 3. Monitor Impact
 ```bash
 # Check logs after each change
-tail -50 /home/MAS_ChangeHub/snapshot.log
+tail -50 /home/MAS_ChangeHub/logs/snapshot.log
 
 # Check Discord notifications
 # Verify snapshot success rate
@@ -431,8 +431,8 @@ CUSTOM_SCHEDULE_TIMES="09:00 17:00"
 
 ### 5. Backup Config
 ```bash
-cp /home/MAS_ChangeHub/snapshot_config.conf \
-   /home/MAS_ChangeHub/snapshot_config.conf.backup
+cp /home/MAS_ChangeHub/config/snapshot_config.conf \
+   /home/MAS_ChangeHub/config/snapshot_config.conf.backup
 ```
 
 ## Advanced Configuration
@@ -530,10 +530,10 @@ The `snapshot_config.conf` file provides:
 **Quick Reference:**
 ```bash
 # Edit config
-nano /home/MAS_ChangeHub/snapshot_config.conf
+nano /home/MAS_ChangeHub/config/snapshot_config.conf
 
 # Apply config
-./apply_config_schedule.sh
+./archive/apply_config_schedule.sh
 
 # Test config
 ./website_snapshot.sh
@@ -544,5 +544,5 @@ tail -f snapshot.log
 
 For more information, see:
 - `/home/MAS_ChangeHub/guides/SCHEDULE-FREQUENCY-GUIDE.md`
-- `/home/MAS_ChangeHub/QUICK-START-SCHEDULE.txt`
+- `/home/MAS_ChangeHub/guides/QUICK-START-SCHEDULE.txt`
 

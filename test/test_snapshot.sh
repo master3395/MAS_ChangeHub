@@ -3,8 +3,19 @@
 # Test script for website snapshot functionality
 # This script tests the snapshot process without creating actual snapshots
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-LOG_FILE="$SCRIPT_DIR/test_snapshot.log"
+
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+LOG_FILE="$MAS_TEST_SNAPSHOT_LOG"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
+if [ -f "$CONFIG_FILE" ]; then
+    # shellcheck source=/dev/null
+    source "$CONFIG_FILE"
+else
+    echo "Configuration file not found: $CONFIG_FILE" >&2
+    exit 1
+fi
 
 # Function to log messages
 log_message() {
@@ -25,28 +36,51 @@ test_website() {
     fi
 }
 
-# Function to test Internet Archive API
+# Function to test Internet Archive API (status endpoints; optional save POST)
 test_ia_api() {
-    local url="https://newstargeted.com"
-    local access_key="XhXHGXAQ91hl3xwd"
-    local secret_key="YQ9r1GOi6ysc9jlD"
-    
-    log_message "🔍 Testing Internet Archive API with: $url"
-    
-    local response=$(curl -s -w "%{http_code}" -o /dev/null \
-        -X POST \
-        -H "Authorization: LOW $access_key:$secret_key" \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "url=$url" \
-        "https://web.archive.org/save/")
-    
-    if [ "$response" = "200" ] || [ "$response" = "201" ]; then
-        log_message "✅ Internet Archive API test successful (HTTP $response)"
-        return 0
-    else
-        log_message "❌ Internet Archive API test failed (HTTP $response)"
+    if [ -z "$IA_ACCESS_KEY" ] || [ -z "$IA_SECRET_KEY" ]; then
+        log_message "❌ IA_ACCESS_KEY and IA_SECRET_KEY must be set in $CONFIG_FILE"
         return 1
     fi
+
+    local cache_bust http_code
+    cache_bust=$(date +%s)
+    log_message "🔍 Testing Internet Archive user status (read-only)"
+
+    http_code=$(curl -s -o /dev/null -w "%{http_code}" \
+        --connect-timeout 10 --max-time 30 \
+        -H "Authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" \
+        -H "Accept: application/json" \
+        "https://web.archive.org/save/status/user?_t=${cache_bust}")
+
+    if [ "$http_code" != "200" ]; then
+        log_message "❌ Internet Archive user status failed (HTTP $http_code)"
+        return 1
+    fi
+    log_message "✅ Internet Archive user status OK (HTTP $http_code)"
+
+    if [ "${TEST_IA_SAVE_SUBMIT:-false}" != "true" ]; then
+        log_message "ℹ️  Skipping Save POST (set TEST_IA_SAVE_SUBMIT=true to test /save/)"
+        return 0
+    fi
+
+    local url="${MAIN_DOMAIN:-https://newstargeted.com}"
+    log_message "🔍 Testing Save Page Now POST with if_not_archived_within (one request)"
+    http_code=$(curl -s -w "%{http_code}" -o /dev/null \
+        --connect-timeout 30 --max-time 60 \
+        -X POST \
+        -H "Authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" \
+        -H "Content-Type: application/x-www-form-urlencoded" \
+        -H "Accept: application/json" \
+        -d "url=${url}&if_not_archived_within=${IF_NOT_ARCHIVED_WITHIN:-20h}&skip_first_archive=1" \
+        "https://web.archive.org/save/")
+
+    if [ "$http_code" = "200" ] || [ "$http_code" = "201" ]; then
+        log_message "✅ Internet Archive Save POST successful (HTTP $http_code)"
+        return 0
+    fi
+    log_message "❌ Internet Archive Save POST failed (HTTP $http_code)"
+    return 1
 }
 
 # Main test function
@@ -84,7 +118,7 @@ main() {
     
     # Test backup directory creation
     log_message "📁 Testing backup directory creation..."
-    local test_backup_dir="$SCRIPT_DIR/test_backups"
+    local test_backup_dir="$MAS_TEST_DIR/test_backups"
     if mkdir -p "$test_backup_dir"; then
         log_message "✅ Backup directory creation successful"
         rmdir "$test_backup_dir"

@@ -49,13 +49,13 @@ The system snapshots the following websites:
 ```
 /home/MAS_ChangeHub/
 ├── website_snapshot.sh      # Main snapshot script
-├── test_snapshot.sh         # Test script
-├── check_snapshots.sh       # Status checker
+├── test/test_snapshot.sh         # Test script
+├── archive/check_snapshots.sh       # Status checker
 ├── menu.sh                  # Interactive CLI menu
 ├── snapshot_config.conf     # Configuration file
-├── snapshot.log            # Main log file
-├── test_snapshot.log       # Test log file
-└── README.md               # This file
+├── logs/snapshot.log            # Main log file
+├── logs/test_snapshot.log       # Test log file
+└── guides/README.md               # This file
 ```
 
 ## Usage
@@ -66,10 +66,10 @@ The system snapshots the following websites:
 /home/MAS_ChangeHub/website_snapshot.sh
 
 # Test the snapshot system
-/home/MAS_ChangeHub/test_snapshot.sh
+/home/MAS_ChangeHub/test/test_snapshot.sh
 
 # Check snapshot status
-/home/MAS_ChangeHub/check_snapshots.sh
+/home/MAS_ChangeHub/archive/check_snapshots.sh
 ```
 
 ### Cron Job
@@ -79,7 +79,7 @@ The system runs automatically daily at 23:00 GMT+2 (Europe/Oslo):
 crontab -l
 
 # The snapshot cron job:
-0 23 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1
+0 23 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/logs/snapshot.log 2>&1
 ```
 
 **Note**: This runs 1 hour before the Contabo snapshot manager (00:00) to ensure Internet Archive snapshots are captured first.
@@ -121,7 +121,7 @@ Internet Archive API enhancement options:
 ### Check Status
 ```bash
 # Run status check
-/home/MAS_ChangeHub/check_snapshots.sh
+/home/MAS_ChangeHub/archive/check_snapshots.sh
 ```
 
 This will show:
@@ -135,7 +135,7 @@ This will show:
 ### Test Discord Webhook
 ```bash
 # Test Discord webhook integration
-/home/MAS_ChangeHub/test-discord-webhook.sh
+/home/MAS_ChangeHub/test/test-discord-webhook.sh
 ```
 
 This will send a test notification to Discord to verify the webhook is working correctly.
@@ -143,7 +143,7 @@ This will send a test notification to Discord to verify the webhook is working c
 ### Test Enhanced Snapshot Options
 ```bash
 # Test enhanced Internet Archive options
-/home/MAS_ChangeHub/test_enhanced_snapshot.sh
+/home/MAS_ChangeHub/test/test_enhanced_snapshot.sh
 ```
 
 This will test the enhanced snapshot functionality with all available options.
@@ -151,13 +151,13 @@ This will test the enhanced snapshot functionality with all available options.
 ### View Logs
 ```bash
 # View main log
-tail -f /home/MAS_ChangeHub/snapshot.log
+tail -f /home/MAS_ChangeHub/logs/snapshot.log
 
 # View recent entries
-tail -50 /home/MAS_ChangeHub/snapshot.log
+tail -50 /home/MAS_ChangeHub/logs/snapshot.log
 
 # Search for errors
-grep "❌" /home/MAS_ChangeHub/snapshot.log
+grep "❌" /home/MAS_ChangeHub/logs/snapshot.log
 ```
 
 ## Troubleshooting
@@ -186,13 +186,13 @@ grep "❌" /home/MAS_ChangeHub/snapshot.log
 ### Log Analysis
 ```bash
 # Check for successful snapshots
-grep "Successfully submitted" /home/MAS_ChangeHub/snapshot.log
+grep "Successfully submitted" /home/MAS_ChangeHub/logs/snapshot.log
 
 # Check for failed snapshots
-grep "Failed to submit" /home/MAS_ChangeHub/snapshot.log
+grep "Failed to submit" /home/MAS_ChangeHub/logs/snapshot.log
 
 # Check website accessibility
-grep "Website is not accessible" /home/MAS_ChangeHub/snapshot.log
+grep "Website is not accessible" /home/MAS_ChangeHub/logs/snapshot.log
 ```
 
 ## Maintenance

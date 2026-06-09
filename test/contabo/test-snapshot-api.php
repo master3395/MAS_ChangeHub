@@ -4,7 +4,7 @@
  */
 
 define('CONTABO_SNAPSHOT_INIT', true);
-require_once __DIR__ . '/config.php';
+require_once dirname(__DIR__, 2) . '/contabo/config.php';
 
 echo "Testing Contabo Snapshot API...\n";
 echo "==============================\n\n";

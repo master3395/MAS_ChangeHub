@@ -3,10 +3,12 @@
 # Apply Schedule from Config File
 # This script reads CUSTOM_SCHEDULE_TIMES from snapshot_config.conf and sets up cron jobs
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
-SNAPSHOT_SCRIPT="$SCRIPT_DIR/website_snapshot.sh"
-LOG_FILE="$SCRIPT_DIR/snapshot.log"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
+SNAPSHOT_SCRIPT="$MAS_SNAPSHOT_SCRIPT"
+LOG_FILE="$MAS_SNAPSHOT_LOG"
 
 # Colors
 GREEN='\033[0;32m'
@@ -35,7 +37,7 @@ if [ "$AUTO_APPLY_SCHEDULE" != "true" ]; then
     echo -e "${CYAN}   AUTO_APPLY_SCHEDULE=true${NC}"
     echo
     echo -e "${YELLOW}💡 Current schedule will remain unchanged.${NC}"
-    echo -e "${YELLOW}   Use ./schedule_manager.sh to manage schedules manually.${NC}"
+    echo -e "${YELLOW}   Use ./archive/schedule_manager.sh to manage schedules manually.${NC}"
     exit 0
 fi
 
@@ -124,7 +126,7 @@ crontab -l | grep "MAS_ChangeHub"
 echo
 echo -e "${CYAN}💡 Tips:${NC}"
 echo -e "   • View logs: tail -f $LOG_FILE"
-echo -e "   • Check status: ./check_snapshots.sh"
+echo -e "   • Check status: ./archive/check_snapshots.sh"
 echo -e "   • Test now: ./website_snapshot.sh"
 echo -e "   • Edit config: nano $CONFIG_FILE"
 echo

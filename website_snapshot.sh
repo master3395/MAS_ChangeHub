@@ -5,14 +5,14 @@
 
 export TZ='Europe/Oslo'
 
-SCRIPT_DIR="/home/MAS_ChangeHub"
-LOG_FILE="$SCRIPT_DIR/snapshot.log"
-CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
-STATE_DIR="$SCRIPT_DIR/state"
+MAS_CHANGEHUB_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=lib/project_paths.sh
+source "$MAS_CHANGEHUB_ROOT/lib/project_paths.sh"
+LOG_FILE="$MAS_SNAPSHOT_LOG"
+CONFIG_FILE="$MAS_SNAPSHOT_CONFIG"
+STATE_DIR="$MAS_STATE_DIR"
 LAST_SUCCESS_FILE="$STATE_DIR/last_success.txt"
 RATE_LIMIT_FILE="$STATE_DIR/rate_limit_until.txt"
-
-mkdir -p "$STATE_DIR"
 
 if [ -f "$CONFIG_FILE" ]; then
     # shellcheck source=/dev/null
@@ -138,7 +138,7 @@ record_success() {
 }
 
 # shellcheck source=lib/snapshot_ia_helpers.sh
-source "$SCRIPT_DIR/lib/snapshot_ia_helpers.sh"
+source "$MAS_CHANGEHUB_ROOT/lib/snapshot_ia_helpers.sh"
 
 create_snapshot() {
     local url="$1"
@@ -323,7 +323,7 @@ with open(path, "w", encoding="utf-8") as handle:
 ' "$payload_file"
 
     log_message "Sending Discord notification (CV2)..."
-    if ! php "$SCRIPT_DIR/lib/discord_cv2_send.php" < "$payload_file"; then
+    if ! php "$MAS_CHANGEHUB_ROOT/lib/discord_cv2_send.php" < "$payload_file"; then
         rm -f "$payload_file"
         log_message "Failed to send Discord notification"
         return 1
@@ -408,7 +408,7 @@ main() {
     send_discord_notification "$success_count" "$total_count" "$failed_count" "$failed_details_json" "$skipped_count"
     log_message "Daily snapshot process completed"
 
-    find "$SCRIPT_DIR" -name "*.log" -mtime +"${LOG_RETENTION_DAYS:-90}" -delete 2>/dev/null || true
+    find "$MAS_LOG_DIR" -name "*.log" -mtime +"${LOG_RETENTION_DAYS:-90}" -delete 2>/dev/null || true
 
     if [ "$failed_count" -eq 0 ]; then
         exit 0

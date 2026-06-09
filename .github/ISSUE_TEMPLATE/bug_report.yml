@@ -1,0 +1,70 @@
+name: Bug report
+description: Something is broken in archive snapshots, Contabo, Discord, or the menu
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not paste API keys, webhook URLs, or `config.php` contents.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Internet Archive / website_snapshot.sh
+        - Contabo snapshot-manager.php
+        - Discord notifications (CV2)
+        - menu.sh / cron / schedule
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect, and what actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Run ./menu.sh option ...
+        2. See error ...
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Release or commit
+      placeholder: e.g. v2.0.0 or git sha
+    validations:
+      required: false
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Environment
+      options:
+        - AlmaLinux 8 / CyberPanel
+        - AlmaLinux 9 / CyberPanel
+        - AlmaLinux 10 / CyberPanel
+        - Other Linux
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log excerpt
+      description: Redact secrets. Paths: logs/snapshot.log, contabo/logs/
+      render: shell
+    validations:
+      required: false

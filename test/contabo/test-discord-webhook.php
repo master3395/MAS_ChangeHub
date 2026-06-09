@@ -1,7 +1,7 @@
 <?php
 
 define('CONTABO_SNAPSHOT_INIT', true);
-require_once __DIR__ . '/config.php';
+require_once dirname(__DIR__, 2) . '/contabo/config.php';
 require_once dirname(__DIR__) . '/lib/discord_notify_contabo.php';
 
 echo "Testing Contabo Discord Webhook Integration...\n";

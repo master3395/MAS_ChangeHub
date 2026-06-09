@@ -156,7 +156,7 @@ This will:
 =====================================================
 
 📋 Configuration Status:
-✅ Configuration file loaded: /home/MAS_ChangeHub/snapshot_config.conf
+✅ Configuration file loaded: /home/MAS_ChangeHub/config/snapshot_config.conf
 
 ⚙️  Enhanced Options Status:
 ===========================
@@ -214,7 +214,7 @@ https://web.archive.org/web/20251008230000/https://newstargeted.com/
 
 ### Check Enhanced Options in Logs
 ```bash
-grep "Capturing" /home/MAS_ChangeHub/snapshot.log
+grep "Capturing" /home/MAS_ChangeHub/logs/snapshot.log
 ```
 
 ### Verify Enhanced Options in Discord
