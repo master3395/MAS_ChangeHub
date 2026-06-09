@@ -65,6 +65,6 @@ body:
     attributes:
       label: Relevant log excerpt
       description: Redact secrets. Paths: logs/snapshot.log, contabo/logs/
-      render: shell
+      render: bash
     validations:
       required: false

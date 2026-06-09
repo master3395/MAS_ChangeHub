@@ -45,4 +45,3 @@ body:
       label: Contribution
       options:
         - label: I am willing to open a pull request for this feature
-          required: false
