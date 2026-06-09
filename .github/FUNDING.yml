@@ -1,3 +1,5 @@
-# GitHub Sponsors button on the repository sidebar and README badge.
-# Add other platforms here when available, e.g. patreon: username
+# Sponsor links (sidebar + README badge)
 github: master3395
+patreon: newstargeted
+custom:
+  - https://www.paypal.com/paypalme/master3395
