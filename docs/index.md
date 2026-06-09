@@ -1,9 +1,8 @@
 ---
 layout: default
-title: Home
 ---
 
-# MAS ChangeHub
+<img class="hero-banner" src="{{ '/assets/banner.png' | relative_url }}" width="1280" height="640" alt="MAS ChangeHub: Internet Archive and Contabo VPS snapshots">
 
 Unified snapshot tooling for **NewsTargeted**: Internet Archive (Wayback Machine) captures and **Contabo VPS** backups, with Discord Components V2 notifications.
 

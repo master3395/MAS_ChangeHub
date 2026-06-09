@@ -3,6 +3,9 @@ description: Unified Internet Archive and Contabo snapshot tooling for NewsTarge
 theme: jekyll-theme-cayman
 show_downloads: true
 
+url: https://master3395.github.io
+baseurl: /MAS_ChangeHub
+
 github:
   repository_url: https://github.com/master3395/MAS_ChangeHub
 
