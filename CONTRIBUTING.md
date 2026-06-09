@@ -20,7 +20,7 @@ Read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before participating.
    - `./test-discord-webhook.sh` (archive)
    - `php contabo/test-discord-webhook.php` (Contabo)
 4. Keep PHP modules under 500 lines; split into `lib/` when needed.
-5. Put new `.md` / `.txt` docs in `to-do/`, not the repository root (except community profile files).
+5. Put new `.md` / `.txt` docs in `guides/`, not the repository root (except community profile files).
 
 ## Pull request flow
 

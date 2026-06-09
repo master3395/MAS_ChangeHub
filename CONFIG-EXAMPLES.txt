@@ -269,7 +269,7 @@ Full Guides:
 • SCHEDULE-FREQUENCY-GUIDE.md
 • README.md
 
-All located in: /home/MAS_ChangeHub/to-do/
+All located in: /home/MAS_ChangeHub/guides/
 
 
 ══════════════════════════════════════════════════════════════════════

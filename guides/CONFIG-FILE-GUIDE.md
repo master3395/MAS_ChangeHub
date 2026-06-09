@@ -543,6 +543,6 @@ tail -f snapshot.log
 ```
 
 For more information, see:
-- `/home/MAS_ChangeHub/to-do/SCHEDULE-FREQUENCY-GUIDE.md`
+- `/home/MAS_ChangeHub/guides/SCHEDULE-FREQUENCY-GUIDE.md`
 - `/home/MAS_ChangeHub/QUICK-START-SCHEDULE.txt`
 

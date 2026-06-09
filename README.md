@@ -41,7 +41,7 @@ Both products send **Discord Components V2** status reports when webhooks are en
 | `lib/discord_notify_archive.php` | IA Discord CV2 payloads |
 | `lib/discord_notify_contabo.php` | Contabo Discord CV2 payloads |
 | `menu.sh` | Interactive CLI for both products |
-| `to-do/` | Guides and operator documentation |
+| `guides/` | Guides and operator documentation |
 
 ## Discord (Components V2)
 
@@ -63,4 +63,13 @@ See [SECURITY.md](SECURITY.md) for vulnerability reporting.
 
 ## Documentation
 
-Full guides live in `to-do/`, including Contabo API setup and schedule configuration.
+Operator guides live in [`guides/`](guides/):
+
+| Guide | Topic |
+|-------|--------|
+| [guides/README.md](guides/README.md) | Internet Archive snapshot system |
+| [guides/CONFIG-FILE-GUIDE.md](guides/CONFIG-FILE-GUIDE.md) | `snapshot_config.conf` reference |
+| [guides/SCHEDULE-FREQUENCY-GUIDE.md](guides/SCHEDULE-FREQUENCY-GUIDE.md) | Cron and schedule tuning |
+| [guides/CONTABO-API-SETUP-GUIDE.md](guides/CONTABO-API-SETUP-GUIDE.md) | Contabo API credentials |
+| [guides/CONTABO-README.md](guides/CONTABO-README.md) | Contabo snapshot manager |
+| [guides/DISCORD-CV2-INTEGRATION.md](guides/DISCORD-CV2-INTEGRATION.md) | Discord Components V2 |

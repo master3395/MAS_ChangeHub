@@ -169,7 +169,7 @@ Solution: Check cron service
 ══════════════════════
 
 For complete documentation, see:
-  /home/MAS_ChangeHub/to-do/SCHEDULE-FREQUENCY-GUIDE.md
+  /home/MAS_ChangeHub/guides/SCHEDULE-FREQUENCY-GUIDE.md
 
 
 🆘 QUICK HELP
@@ -196,6 +196,6 @@ Test Run Now:
 ════════════════════════════════════════════════════════════════════════
 Created: 2025-10-12
 Version: 1.2
-Support: Check logs and documentation in /home/MAS_ChangeHub/to-do/
+Support: Check logs and documentation in /home/MAS_ChangeHub/guides/
 ════════════════════════════════════════════════════════════════════════
 
