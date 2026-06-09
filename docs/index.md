@@ -37,17 +37,17 @@ layout: default
   <div class="nt-card">
     <p class="nt-card-title">Internet Archive</p>
     <p class="nt-card-entry"><code>website_snapshot.sh</code> / <code>./menu.sh</code></p>
-    <a href="../guides/README.md">Archive guide</a>
+    <a href="{{ site.repo_blob_base }}/guides/README.md">Archive guide</a>
   </div>
   <div class="nt-card">
     <p class="nt-card-title">Contabo VPS</p>
     <p class="nt-card-entry"><code>contabo/snapshot-manager.php</code></p>
-    <a href="../guides/CONTABO-README.md">Contabo guide</a>
+    <a href="{{ site.repo_blob_base }}/guides/CONTABO-README.md">Contabo guide</a>
   </div>
   <div class="nt-card">
     <p class="nt-card-title">Discord CV2</p>
     <p class="nt-card-entry"><code>lib/discord_cv2_*</code></p>
-    <a href="../guides/DISCORD-CV2-INTEGRATION.md">CV2 guide</a>
+    <a href="{{ site.repo_blob_base }}/guides/DISCORD-CV2-INTEGRATION.md">CV2 guide</a>
   </div>
 </div>
 
@@ -64,21 +64,22 @@ chmod 600 config/snapshot_config.conf contabo/config.php
 
 ## Documentation index
 
-- [Configuration file guide](../guides/CONFIG-FILE-GUIDE.md)
-- [Schedule and cron](../guides/SCHEDULE-FREQUENCY-GUIDE.md)
-- [Contabo API setup](../guides/CONTABO-API-SETUP-GUIDE.md)
-- [Quick start schedule](../guides/QUICK-START-SCHEDULE.txt)
-- [Full README on GitHub](../README.md)
+- [Configuration file guide]({{ site.repo_blob_base }}/guides/CONFIG-FILE-GUIDE.md)
+- [Schedule and cron]({{ site.repo_blob_base }}/guides/SCHEDULE-FREQUENCY-GUIDE.md)
+- [Contabo API setup]({{ site.repo_blob_base }}/guides/CONTABO-API-SETUP-GUIDE.md)
+- [Quick start schedule]({{ site.repo_blob_base }}/guides/QUICK-START-SCHEDULE.txt)
+- [Full README on GitHub]({{ site.repo_blob_base }}/README.md)
+- [All guides on GitHub]({{ site.github.repository_url }}/tree/master/guides)
 
 ## Community
 
-- [Contributing](../CONTRIBUTING.md)
-- [Security policy](../SECURITY.md)
-- [Code of Conduct](../CODE_OF_CONDUCT.md)
+- [Contributing]({{ site.repo_blob_base }}/CONTRIBUTING.md)
+- [Security policy]({{ site.repo_blob_base }}/SECURITY.md)
+- [Code of Conduct]({{ site.repo_blob_base }}/CODE_OF_CONDUCT.md)
 - [Report a bug](https://github.com/master3395/MAS_ChangeHub/issues/new/choose)
 
 ## License
 
-MIT. See [LICENSE](../LICENSE).
+MIT. See [LICENSE]({{ site.repo_blob_base }}/LICENSE).
 
 </div>
