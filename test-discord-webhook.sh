@@ -1,87 +1,57 @@
 #!/bin/bash
 
-# Test Discord Webhook for Archive Snapshots
-# This script sends a test notification to verify the webhook is working
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CONFIG_FILE="$SCRIPT_DIR/snapshot_config.conf"
 
 echo "Testing Discord Webhook Integration..."
 echo "======================================"
 echo ""
 
-# Discord webhook URL
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1425273824701579386/EUCQQ6ix__lPp8qWpRr1_bL05G2CRWGqcw_MVdbIxSROYkJcbTS0iTXkeamghwwZhuRf"
+if [ -f "$CONFIG_FILE" ]; then
+    # shellcheck source=/dev/null
+    source "$CONFIG_FILE"
+fi
 
-if [ -z "$DISCORD_WEBHOOK_URL" ]; then
-    echo "❌ Discord webhook URL is not set"
+DISCORD_USE_CV2="${DISCORD_USE_CV2:-true}"
+DISCORD_HERO_IMAGE_URL="${DISCORD_HERO_IMAGE_URL:-https://newstargeted.com/assets/status-cv2/archive.png}"
+
+if [ "$DISCORD_WEBHOOK_ENABLED" != "true" ] || [ -z "$DISCORD_WEBHOOK_URL" ]; then
+    echo "Discord webhook is disabled or URL not set in snapshot_config.conf"
     exit 1
 fi
 
-echo "✅ Discord webhook is configured"
-echo "📡 Webhook URL: ${DISCORD_WEBHOOK_URL:0:50}..."
-echo ""
+echo "Discord webhook is configured"
+echo "Sending CV2 test notification..."
 
-# Build test notification
-timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
-timestamp_display=$(date '+%Y-%m-%d %H:%M:%S %Z')
-
-payload=$(cat <<EOF
-{
-  "embeds": [{
-    "title": "🧪 Test Notification - Internet Archive Snapshot Manager",
-    "description": "This is a test notification sent at **$timestamp_display**",
-    "color": 3447003,
-    "fields": [
-      {
-        "name": "📊 Test Statistics",
-        "value": "**Total Websites:** 15\n**Successful Snapshots:** 15\n**Failed Snapshots:** 0",
-        "inline": false
-      },
-      {
-        "name": "🌐 Websites Archived",
-        "value": "• [newstargeted.com](https://web.archive.org/web/*/https://newstargeted.com/) - Main domain\n• [api.newstargeted.com](https://web.archive.org/web/*/https://api.newstargeted.com/)\n• [infoskjerm.newstargeted.com](https://web.archive.org/web/*/https://infoskjerm.newstargeted.com/)\n• [mas.newstargeted.com](https://web.archive.org/web/*/https://mas.newstargeted.com/)\n• [discord.newstargeted.com](https://web.archive.org/web/*/https://discord.newstargeted.com/)\n• and 10 more domains...",
-        "inline": false
-      },
-      {
-        "name": "📦 View All Snapshots",
-        "value": "Click any domain link above to view its Wayback Machine calendar with all historical snapshots.",
-        "inline": false
-      },
-      {
-        "name": "✅ Status",
-        "value": "Webhook integration is working correctly!",
-        "inline": false
-      }
-    ],
-    "footer": {
-      "text": "Internet Archive Snapshot Manager v1.0 • newstargeted.com"
-    },
-    "timestamp": "$timestamp"
-  }]
+payload_file=$(mktemp /tmp/mas-discord-test-XXXXXX.json)
+python3 -c '
+import json, sys
+payload = {
+    "webhook_url": sys.argv[1],
+    "use_cv2": True,
+    "success_count": 15,
+    "total_count": 15,
+    "failed_count": 0,
+    "skipped_count": 0,
+    "failed_details": "",
+    "websites_list": "• [newstargeted.com](https://web.archive.org/web/*/https://newstargeted.com/)\n• [api.newstargeted.com](https://web.archive.org/web/*/https://api.newstargeted.com/)",
+    "capture_options": "• Simple capture (URL only)\n",
+    "timezone": "Europe/Oslo",
+    "hero_image_url": sys.argv[2],
+    "username": "Archive Snapshot Manager",
 }
-EOF
-)
+with open(sys.argv[3], "w", encoding="utf-8") as handle:
+    json.dump(payload, handle)
+' "$DISCORD_WEBHOOK_URL" "$DISCORD_HERO_IMAGE_URL" "$payload_file"
 
-echo "Sending test notification..."
-
-# Send webhook
-response=$(curl -s -w "\n%{http_code}" \
-    -X POST \
-    -H "Content-Type: application/json" \
-    -d "$payload" \
-    "$DISCORD_WEBHOOK_URL")
-
-http_code=$(echo "$response" | tail -n1)
-
-echo ""
-
-if [ "$http_code" = "204" ] || [ "$http_code" = "200" ]; then
-    echo "✅ Test notification sent successfully!"
-    echo "   Check your Discord channel for the test message."
+if php "$SCRIPT_DIR/lib/discord_cv2_send.php" < "$payload_file"; then
+    echo "Test notification sent successfully."
+    echo "Check your Discord channel for the CV2 message."
 else
-    echo "❌ Failed to send notification: HTTP $http_code"
-    echo "Response: $(echo "$response" | head -n-1)"
+    echo "Failed to send test notification."
+    rm -f "$payload_file"
     exit 1
 fi
 
-echo ""
+rm -f "$payload_file"
 echo "Done!"
-

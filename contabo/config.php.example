@@ -1,0 +1,43 @@
+<?php
+if (!defined('CONTABO_SNAPSHOT_INIT')) {
+    http_response_code(404);
+    exit;
+}
+
+define('CONTABO_CLIENT_ID', 'YOUR_CLIENT_ID');
+define('CONTABO_CLIENT_SECRET', 'YOUR_CLIENT_SECRET');
+define('CONTABO_API_USER', 'your-email@example.com');
+define('CONTABO_API_PASSWORD', 'your-api-password');
+
+define('CONTABO_AUTH_URL', 'https://auth.contabo.com/auth/realms/contabo/protocol/openid-connect/token');
+define('CONTABO_API_BASE_URL', 'https://api.contabo.com/v1');
+
+define('INSTANCE_NAMES', [
+    'newstargeted.com',
+]);
+
+define('LOG_DIR', '/home/MAS_ChangeHub/contabo/logs');
+define('LOG_FILE', LOG_DIR . '/snapshot-manager.log');
+define('ERROR_LOG_FILE', LOG_DIR . '/snapshot-errors.log');
+
+define('MAX_SNAPSHOTS_PER_INSTANCE', 3);
+define('SNAPSHOT_NAMES', [
+    'snapshot-1',
+    'snapshot-2',
+    'snapshot-3',
+]);
+define('SNAPSHOT_NAMES_BY_INSTANCE', []);
+define('SNAPSHOT_DESCRIPTION_TEMPLATE', 'Daily backup {date} Oslo');
+
+define('TIMEZONE', 'Europe/Oslo');
+date_default_timezone_set(TIMEZONE);
+
+define('SNAPSHOT_TIME', '01:00');
+define('AUTO_APPLY_SCHEDULE', true);
+
+define('DISCORD_WEBHOOK_URL', '');
+define('DISCORD_WEBHOOK_ENABLED', true);
+define('DISCORD_USE_CV2', true);
+define('DISCORD_HERO_IMAGE_URL', 'https://newstargeted.com/assets/status-cv2/contabo.png');
+define('DISCORD_WEBHOOK_USERNAME', 'Contabo Snapshot Manager');
+define('CONTABO_PANEL_URL', 'https://my.contabo.com/');

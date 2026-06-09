@@ -19,8 +19,8 @@ NC='\033[0m' # No Color
 show_header() {
     clear
     echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║                    ARCHIVE-SNAPSHOTS MENU                    ║${NC}"
-    echo -e "${CYAN}║              Website Snapshot Management System              ║${NC}"
+    echo -e "${CYAN}║                      MAS CHANGEHUB MENU                      ║${NC}"
+    echo -e "${CYAN}║         Internet Archive + Contabo Snapshot Manager          ║${NC}"
     echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
     echo
 }
@@ -38,9 +38,41 @@ show_menu() {
     echo -e "${GREEN}8.${NC} ⚙️  Configuration"
     echo -e "${GREEN}9.${NC} 📚 Help & Documentation"
     echo -e "${GREEN}10.${NC} 🔄 Refresh Status"
+    echo -e "${PURPLE}11.${NC} 🖥️  Run Contabo Snapshot Now"
+    echo -e "${PURPLE}12.${NC} 📣 Test Contabo Discord Webhook"
+    echo -e "${PURPLE}13.${NC} 📋 View Contabo Logs"
+    echo -e "${PURPLE}14.${NC} ⏰ Apply Contabo Cron Schedule"
     echo -e "${RED}0.${NC} 🚪 Exit"
     echo
-    echo -n -e "${BLUE}Enter your choice [0-10]: ${NC}"
+    echo -n -e "${BLUE}Enter your choice [0-14]: ${NC}"
+}
+
+run_contabo_snapshot() {
+    echo -e "${YELLOW}Running Contabo snapshot manager...${NC}"
+    php "$SCRIPT_DIR/contabo/snapshot-manager.php"
+    echo
+    read -p "Press Enter to continue..."
+}
+
+test_contabo_discord() {
+    echo -e "${YELLOW}Sending Contabo Discord test...${NC}"
+    php "$SCRIPT_DIR/contabo/test-discord-webhook.php"
+    echo
+    read -p "Press Enter to continue..."
+}
+
+view_contabo_logs() {
+    echo -e "${YELLOW}Contabo snapshot logs:${NC}"
+    tail -n 40 "$SCRIPT_DIR/contabo/logs/snapshot-manager.log" 2>/dev/null || echo "No log file yet."
+    echo
+    read -p "Press Enter to continue..."
+}
+
+apply_contabo_cron() {
+    echo -e "${YELLOW}Applying Contabo cron from config.php...${NC}"
+    "$SCRIPT_DIR/contabo/apply_config_schedule.sh"
+    echo
+    read -p "Press Enter to continue..."
 }
 
 # Function to run snapshot
@@ -523,6 +555,10 @@ main() {
             8) show_config ;;
             9) show_help ;;
             10) refresh_status ;;
+            11) run_contabo_snapshot ;;
+            12) test_contabo_discord ;;
+            13) view_contabo_logs ;;
+            14) apply_contabo_cron ;;
             0) 
                 echo -e "${GREEN}👋 Goodbye!${NC}"
                 exit 0

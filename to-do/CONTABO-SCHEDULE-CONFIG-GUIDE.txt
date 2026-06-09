@@ -1,0 +1,217 @@
+╔══════════════════════════════════════════════════════════════════════╗
+║        CONTABO SNAPSHOT SCHEDULE CONFIGURATION GUIDE                 ║
+║            Control Schedule from config.php                          ║
+╚══════════════════════════════════════════════════════════════════════╝
+
+📝 CONFIGURATION FILE LOCATION
+═══════════════════════════════
+/home/contabo-snapshots/config.php
+
+
+═══════════════════════════════════════════════════════════════════════
+HOW TO CHANGE THE SNAPSHOT TIME
+═══════════════════════════════════════════════════════════════════════
+
+STEP 1: Edit config.php
+────────────────────────
+nano /home/contabo-snapshots/config.php
+
+STEP 2: Change SNAPSHOT_TIME
+─────────────────────────────
+// Schedule Configuration
+define('SNAPSHOT_TIME', '01:00'); // Change this to your desired time
+
+Examples:
+  define('SNAPSHOT_TIME', '00:00');  // Midnight
+  define('SNAPSHOT_TIME', '01:00');  // 1:00 AM (current)
+  define('SNAPSHOT_TIME', '02:00');  // 2:00 AM
+  define('SNAPSHOT_TIME', '03:30');  // 3:30 AM
+  define('SNAPSHOT_TIME', '23:00');  // 11:00 PM
+
+STEP 3: Apply the Configuration
+────────────────────────────────
+cd /home/contabo-snapshots
+./apply_config_schedule.sh
+
+DONE! ✅ The cron job is automatically updated.
+
+
+═══════════════════════════════════════════════════════════════════════
+CURRENT CONFIGURATION
+═══════════════════════════════════════════════════════════════════════
+
+Snapshot Time:     01:00 GMT+2 (1:00 AM)
+Instance:          newstargeted.com
+Max Snapshots:     3 (automatic rotation)
+Auto-Apply:        Enabled
+
+
+═══════════════════════════════════════════════════════════════════════
+COMPLETE DAILY SCHEDULE (All Systems)
+═══════════════════════════════════════════════════════════════════════
+
+00:00 GMT+2 - Internet Archive snapshot (newstargeted.com only)
+01:00 GMT+2 - Contabo VM snapshot (newstargeted.com)
+12:00 GMT+2 - Internet Archive snapshot (newstargeted.com only)
+
+
+═══════════════════════════════════════════════════════════════════════
+QUICK COMMANDS
+═══════════════════════════════════════════════════════════════════════
+
+View Current Schedule:
+  crontab -l | grep contabo-snapshots
+
+Edit Schedule:
+  nano /home/contabo-snapshots/config.php
+  # Change SNAPSHOT_TIME
+  ./apply_config_schedule.sh
+
+View Logs:
+  tail -f /home/contabo-snapshots/logs/snapshot-manager.log
+
+Test Run Now:
+  cd /home/contabo-snapshots
+  php snapshot-manager.php
+
+
+═══════════════════════════════════════════════════════════════════════
+CONFIGURATION OPTIONS IN config.php
+═══════════════════════════════════════════════════════════════════════
+
+SNAPSHOT_TIME
+  When to run the snapshot (24-hour format HH:MM)
+  Example: '01:00', '13:30', '23:45'
+
+AUTO_APPLY_SCHEDULE
+  true  → Automatically apply schedule from config.php
+  false → Use manual cron configuration
+
+MAX_SNAPSHOTS_PER_INSTANCE
+  How many snapshots to keep (older ones auto-deleted)
+  Default: 3
+
+SNAPSHOT_NAMES
+  Exact name for each retained snapshot (3 entries when MAX is 3)
+  Example: 'CP-2-4-4-Alma-sieve-1', 'CP-2-4-4-Alma-sieve-2', ...
+
+SNAPSHOT_NAMES_BY_INSTANCE
+  Optional per-instance overrides (display name => array of names)
+
+SNAPSHOT_DESCRIPTION_TEMPLATE
+  Text sent to Contabo when creating; use {date} for timestamp
+
+
+═══════════════════════════════════════════════════════════════════════
+EXAMPLES
+═══════════════════════════════════════════════════════════════════════
+
+Example 1: Change to 2:00 AM
+────────────────────────────
+1. nano /home/contabo-snapshots/config.php
+2. Change: define('SNAPSHOT_TIME', '02:00');
+3. Save and exit (Ctrl+X, Y, Enter)
+4. Run: ./apply_config_schedule.sh
+
+Result: Contabo snapshots will run at 02:00 GMT+2
+
+
+Example 2: Change to 3:30 AM
+────────────────────────────
+1. nano /home/contabo-snapshots/config.php
+2. Change: define('SNAPSHOT_TIME', '03:30');
+3. Save and exit
+4. Run: ./apply_config_schedule.sh
+
+Result: Contabo snapshots will run at 03:30 GMT+2
+
+
+═══════════════════════════════════════════════════════════════════════
+RECOMMENDED TIMING
+═══════════════════════════════════════════════════════════════════════
+
+✅ RECOMMENDED: 01:00 GMT+2 (Current)
+   • Runs 1 hour after Internet Archive midnight snapshot
+   • Good separation from other systems
+   • Off-peak hours for better performance
+
+✅ ALTERNATIVE: 02:00 GMT+2
+   • Even more separation from Internet Archive
+   • Still in off-peak hours
+
+⚠️  AVOID: 00:00 GMT+2
+   • Conflicts with Internet Archive snapshot
+   • Both systems running at same time
+
+
+═══════════════════════════════════════════════════════════════════════
+MONITORING
+═══════════════════════════════════════════════════════════════════════
+
+Check Cron Job:
+  crontab -l | grep contabo
+
+View Recent Logs:
+  tail -50 /home/contabo-snapshots/logs/snapshot-manager.log
+
+Check Discord:
+  You'll receive a notification after each successful snapshot
+
+Verify Next Run:
+  # Check cron daemon
+  systemctl status crond
+
+
+═══════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════
+
+Problem: Schedule not changing
+Solution: Make sure AUTO_APPLY_SCHEDULE is true and run apply script
+  grep "AUTO_APPLY_SCHEDULE" /home/contabo-snapshots/config.php
+  ./apply_config_schedule.sh
+
+Problem: Cron not running
+Solution: Check cron service
+  systemctl status crond
+  systemctl restart crond
+
+Problem: Snapshots not appearing
+Solution: Check logs for errors
+  tail -100 /home/contabo-snapshots/logs/snapshot-manager.log
+
+
+═══════════════════════════════════════════════════════════════════════
+BENEFITS OF CONFIG-BASED SCHEDULING
+═══════════════════════════════════════════════════════════════════════
+
+✅ Single configuration file for all settings
+✅ No need to edit crontab manually
+✅ Easy to version control
+✅ Consistent with Internet Archive snapshot system
+✅ Simple one-command application
+✅ Automatic validation of time format
+
+
+═══════════════════════════════════════════════════════════════════════
+INTEGRATION WITH INTERNET ARCHIVE SNAPSHOTS
+═══════════════════════════════════════════════════════════════════════
+
+Both systems now use config-based scheduling:
+
+Internet Archive:
+  Config: /home/archive-snapshots/snapshot_config.conf
+  Times: 00:00 and 12:00 GMT+2
+  Apply: cd /home/archive-snapshots && ./apply_config_schedule.sh
+
+Contabo VM:
+  Config: /home/contabo-snapshots/config.php
+  Time: 01:00 GMT+2
+  Apply: cd /home/contabo-snapshots && ./apply_config_schedule.sh
+
+
+════════════════════════════════════════════════════════════════════════
+Created: 2025-10-12
+Version: 1.0
+════════════════════════════════════════════════════════════════════════
+

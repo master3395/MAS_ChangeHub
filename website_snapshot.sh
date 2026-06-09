@@ -25,7 +25,6 @@ fi
 CAPTURE_OUTLINKS="${CAPTURE_OUTLINKS:-false}"
 CAPTURE_SCREENSHOT="${CAPTURE_SCREENSHOT:-false}"
 CAPTURE_ALL="${CAPTURE_ALL:-false}"
-SKIP_FIRST_ARCHIVE="${SKIP_FIRST_ARCHIVE:-false}"
 EMAIL_RESULT="${EMAIL_RESULT:-false}"
 WACZ_FILE="${WACZ_FILE:-false}"
 DOMAIN_SELECTION_MODE="${DOMAIN_SELECTION_MODE:-main}"
@@ -33,15 +32,26 @@ MAIN_DOMAIN="${MAIN_DOMAIN:-https://newstargeted.com}"
 DISCORD_WEBHOOK_ENABLED="${DISCORD_WEBHOOK_ENABLED:-true}"
 DISCORD_NOTIFY_ON_FAILURE_ONLY="${DISCORD_NOTIFY_ON_FAILURE_ONLY:-true}"
 DISCORD_NOTIFY_ON_SUCCESS="${DISCORD_NOTIFY_ON_SUCCESS:-false}"
+DISCORD_USE_CV2="${DISCORD_USE_CV2:-true}"
+DISCORD_HERO_IMAGE_URL="${DISCORD_HERO_IMAGE_URL:-https://newstargeted.com/assets/status-cv2/archive.png}"
 REQUEST_TIMEOUT="${REQUEST_TIMEOUT:-60}"
 CONNECT_TIMEOUT="${CONNECT_TIMEOUT:-30}"
-DELAY_BETWEEN_REQUESTS="${DELAY_BETWEEN_REQUESTS:-5}"
-MAX_RETRIES="${MAX_RETRIES:-3}"
+DELAY_BETWEEN_REQUESTS="${DELAY_BETWEEN_REQUESTS:-20}"
+MAX_RETRIES="${MAX_RETRIES:-1}"
+MAX_RETRIES_ON_RATE_LIMIT="${MAX_RETRIES_ON_RATE_LIMIT:-0}"
 RETRY_BASE_DELAY_SECONDS="${RETRY_BASE_DELAY_SECONDS:-120}"
-RATE_LIMIT_COOLDOWN_HOURS="${RATE_LIMIT_COOLDOWN_HOURS:-12}"
+RATE_LIMIT_COOLDOWN_HOURS="${RATE_LIMIT_COOLDOWN_HOURS:-24}"
 SKIP_IF_SNAPSHOT_WITHIN_HOURS="${SKIP_IF_SNAPSHOT_WITHIN_HOURS:-20}"
-FALLBACK_SIMPLE_ON_RATE_LIMIT="${FALLBACK_SIMPLE_ON_RATE_LIMIT:-true}"
+IF_NOT_ARCHIVED_WITHIN="${IF_NOT_ARCHIVED_WITHIN:-20h}"
+FALLBACK_SIMPLE_ON_RATE_LIMIT="${FALLBACK_SIMPLE_ON_RATE_LIMIT:-false}"
+PREFLIGHT_IA_STATUS="${PREFLIGHT_IA_STATUS:-true}"
+CDX_PRECHECK_ENABLED="${CDX_PRECHECK_ENABLED:-true}"
+DELAY_WB_AVAILABILITY="${DELAY_WB_AVAILABILITY:-false}"
+SKIP_FIRST_ARCHIVE="${SKIP_FIRST_ARCHIVE:-true}"
 IA_API_URL="${IA_API_URL:-https://web.archive.org/save/}"
+IA_STATUS_SYSTEM_URL="${IA_STATUS_SYSTEM_URL:-https://web.archive.org/save/status/system}"
+IA_STATUS_USER_URL="${IA_STATUS_USER_URL:-https://web.archive.org/save/status/user}"
+RUN_HIT_RATE_LIMIT=0
 
 if [ -z "$IA_ACCESS_KEY" ] || [ -z "$IA_SECRET_KEY" ]; then
     echo "IA_ACCESS_KEY and IA_SECRET_KEY must be set in $CONFIG_FILE" >&2
@@ -127,95 +137,22 @@ record_success() {
     mv "${LAST_SUCCESS_FILE}.tmp" "$LAST_SUCCESS_FILE"
 }
 
-build_api_params() {
-    local url="$1"
-    local mode="$2"
-    local api_params="url=${url}"
-
-    if [ "$mode" = "simple" ]; then
-        echo "$api_params"
-        return
-    fi
-
-    if [ "$CAPTURE_OUTLINKS" = "true" ]; then
-        api_params="${api_params}&capture_outlinks=1"
-    fi
-    if [ "$CAPTURE_SCREENSHOT" = "true" ]; then
-        api_params="${api_params}&capture_screenshot=1"
-    fi
-    if [ "$CAPTURE_ALL" = "true" ]; then
-        api_params="${api_params}&capture_all=1"
-    fi
-    if [ "$SKIP_FIRST_ARCHIVE" = "true" ]; then
-        api_params="${api_params}&skip_first_archive=1"
-    fi
-    if [ "$EMAIL_RESULT" = "true" ]; then
-        api_params="${api_params}&email_result=1"
-    fi
-    if [ "$WACZ_FILE" = "true" ]; then
-        api_params="${api_params}&wacz=1"
-    fi
-
-    echo "$api_params"
-}
-
-submit_to_archive() {
-    local url="$1"
-    local mode="$2"
-    local api_params
-    api_params=$(build_api_params "$url" "$mode")
-
-    local body_file
-    body_file=$(mktemp)
-    local http_code
-    http_code=$(curl -s -o "$body_file" -w "%{http_code}" \
-        --connect-timeout "$CONNECT_TIMEOUT" \
-        --max-time "$REQUEST_TIMEOUT" \
-        -X POST \
-        -H "Authorization: LOW ${IA_ACCESS_KEY}:${IA_SECRET_KEY}" \
-        -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "$api_params" \
-        "$IA_API_URL")
-
-    local body_snippet
-    body_snippet=$(head -c 200 "$body_file" | tr '\n' ' ')
-    rm -f "$body_file"
-
-    echo "${http_code}|${body_snippet}"
-}
-
-log_capture_options() {
-    local mode="$1"
-    if [ "$mode" = "simple" ]; then
-        log_message "   Using simple capture (URL only)"
-        return
-    fi
-    if [ "$CAPTURE_OUTLINKS" = "true" ]; then
-        log_message "   Capturing outlinks"
-    fi
-    if [ "$CAPTURE_SCREENSHOT" = "true" ]; then
-        log_message "   Capturing screenshot"
-    fi
-    if [ "$CAPTURE_ALL" = "true" ]; then
-        log_message "   Capturing error pages"
-    fi
-    if [ "$SKIP_FIRST_ARCHIVE" = "true" ]; then
-        log_message "   skip_first_archive enabled"
-    fi
-}
+# shellcheck source=lib/snapshot_ia_helpers.sh
+source "$SCRIPT_DIR/lib/snapshot_ia_helpers.sh"
 
 create_snapshot() {
     local url="$1"
     local -n failure_reason_ref=$2
     local attempt=1
-    local delay="$RETRY_BASE_DELAY_SECONDS"
-    local modes=("enhanced")
-
-    if [ "$FALLBACK_SIMPLE_ON_RATE_LIMIT" = "true" ]; then
-        modes+=("simple")
-    fi
+    local max_attempts="$MAX_RETRIES"
 
     log_message "Creating snapshot for: $url"
+
+    if [ "$RUN_HIT_RATE_LIMIT" -eq 1 ]; then
+        failure_reason_ref="Skipped: rate limit hit earlier in this run"
+        log_message "Skipping $url: $failure_reason_ref"
+        return 0
+    fi
 
     if is_rate_limited_cooldown; then
         failure_reason_ref="Skipped: Internet Archive rate limit cooldown (avoiding HTTP 429)"
@@ -224,53 +161,51 @@ create_snapshot() {
     fi
 
     if recent_snapshot_recorded "$url"; then
-        failure_reason_ref="Skipped: successful snapshot within last ${SKIP_IF_SNAPSHOT_WITHIN_HOURS}h"
+        failure_reason_ref="Skipped: successful snapshot within last ${SKIP_IF_SNAPSHOT_WITHIN_HOURS}h (local state)"
         log_message "Skipping $url ($failure_reason_ref)"
         return 0
     fi
 
-    for mode in "${modes[@]}"; do
-        log_capture_options "$mode"
-        attempt=1
-        delay="$RETRY_BASE_DELAY_SECONDS"
+    if [ "$CDX_PRECHECK_ENABLED" = "true" ] && wayback_recent_capture_exists "$url"; then
+        failure_reason_ref="Skipped: recent Wayback capture within last ${SKIP_IF_SNAPSHOT_WITHIN_HOURS}h (CDX)"
+        log_message "Skipping $url ($failure_reason_ref)"
+        return 0
+    fi
 
-        while [ "$attempt" -le "$MAX_RETRIES" ]; do
-            local result http_code body_snippet
-            result=$(submit_to_archive "$url" "$mode")
-            http_code="${result%%|*}"
-            body_snippet="${result#*|}"
+    log_capture_options
+    log_message "   Submitting one Save Page Now request (no 429 retries)"
 
-            if [ "$http_code" = "200" ] || [ "$http_code" = "201" ]; then
-                log_message "Successfully submitted $url ($mode, HTTP $http_code)"
-                record_success "$url" "$mode"
-                rm -f "$RATE_LIMIT_FILE"
-                failure_reason_ref=""
-                return 0
-            fi
+    while [ "$attempt" -le "$max_attempts" ]; do
+        local result http_code body_snippet spn_error
+        result=$(submit_to_archive "$url")
+        http_code="${result%%|*}"
+        body_snippet="${result#*|}"
 
-            if [ "$http_code" = "429" ] || [ "$http_code" = "503" ]; then
-                set_rate_limit_cooldown "$RATE_LIMIT_COOLDOWN_HOURS"
-                failure_reason_ref="Internet Archive rate limited (HTTP $http_code). Too many Save-Page-Now requests."
-                log_message "Rate limited on $url ($mode, HTTP $http_code, attempt $attempt/$MAX_RETRIES)"
-
-                if [ "$attempt" -lt "$MAX_RETRIES" ]; then
-                    log_message "   Waiting ${delay}s before retry..."
-                    sleep "$delay"
-                    delay=$((delay * 2))
-                    attempt=$((attempt + 1))
-                    continue
-                fi
-                break
-            fi
-
-            failure_reason_ref="Internet Archive error (HTTP $http_code): ${body_snippet}"
-            log_message "Failed to submit $url ($mode, HTTP $http_code): ${body_snippet}"
-            return 1
-        done
-
-        if [ "$mode" = "enhanced" ] && [ "$FALLBACK_SIMPLE_ON_RATE_LIMIT" = "true" ]; then
-            log_message "   Falling back to simple capture for $url"
+        if [ "$http_code" = "200" ] || [ "$http_code" = "201" ]; then
+            log_message "Successfully submitted $url (HTTP $http_code)"
+            record_success "$url" "spn2"
+            rm -f "$RATE_LIMIT_FILE"
+            failure_reason_ref=""
+            return 0
         fi
+
+        if is_spn_rate_limit_response "$http_code" "$body_snippet"; then
+            spn_error=$(extract_spn_error_code "$body_snippet")
+            handle_rate_limit_hit "$url" "$http_code" "$spn_error"
+            failure_reason_ref="Internet Archive rate limited (HTTP $http_code). Too many Save-Page-Now requests."
+            return 1
+        fi
+
+        if [ "$attempt" -lt "$max_attempts" ]; then
+            log_message "   Non-rate-limit error HTTP $http_code; retry $attempt/$max_attempts in ${RETRY_BASE_DELAY_SECONDS}s"
+            sleep "$RETRY_BASE_DELAY_SECONDS"
+            attempt=$((attempt + 1))
+            continue
+        fi
+
+        failure_reason_ref="Internet Archive error (HTTP $http_code)"
+        log_message "Failed to submit $url (HTTP $http_code)"
+        return 1
     done
 
     return 1
@@ -333,97 +268,86 @@ send_discord_notification() {
         return
     fi
 
-    local status_emoji status_text color
-    if [ "$failed_count" -eq 0 ]; then
-        status_emoji="✅"
-        status_text="Completed Successfully"
-        color=3066993
-    elif [ "$success_count" -gt 0 ] || [ "$skipped_count" -gt 0 ]; then
-        status_emoji="⚠️"
-        status_text="Completed with Warnings"
-        color=16776960
-    else
-        status_emoji="❌"
-        status_text="Completed with Errors"
-        color=15158332
-    fi
-
-    local timestamp timestamp_display
-    timestamp=$(date -u '+%Y-%m-%dT%H:%M:%S.000Z')
-    timestamp_display=$(date '+%Y-%m-%d %H:%M:%S %Z')
-
-    local stats_value="**Total Websites:** $total_count\n**Successful Snapshots:** $success_count\n**Failed Snapshots:** $failed_count"
-    if [ "$skipped_count" -gt 0 ]; then
-        stats_value="${stats_value}\n**Skipped (recent/cooldown):** $skipped_count"
-    fi
-
-    local fields
-    fields="[{\"name\":\"📊 Statistics\",\"value\":\"$stats_value\",\"inline\":false}"
-
-    local websites_list="• [newstargeted.com](https://web.archive.org/web/*/https://newstargeted.com/) - Main domain\n• [api.newstargeted.com](https://web.archive.org/web/*/https://api.newstargeted.com/)\n• [infoskjerm.newstargeted.com](https://web.archive.org/web/*/https://infoskjerm.newstargeted.com/)\n• [mas.newstargeted.com](https://web.archive.org/web/*/https://mas.newstargeted.com/)\n• [discord.newstargeted.com](https://web.archive.org/web/*/https://discord.newstargeted.com/)\n• and 10 more domains..."
-    fields="${fields},{\"name\":\"🌐 Websites Archived\",\"value\":\"$websites_list\",\"inline\":false}"
+    local websites_list
+    websites_list=$(build_websites_list_for_discord)
 
     local options_info=""
     if [ "$CAPTURE_OUTLINKS" = "true" ]; then
-        options_info="${options_info}• Outlinks captured\n"
+        options_info="${options_info}• Outlinks captured"$'\n'
     fi
     if [ "$CAPTURE_SCREENSHOT" = "true" ]; then
-        options_info="${options_info}• Screenshots taken\n"
+        options_info="${options_info}• Screenshots taken"$'\n'
     fi
     if [ "$CAPTURE_ALL" = "true" ]; then
-        options_info="${options_info}• Error pages included\n"
+        options_info="${options_info}• Error pages included"$'\n'
     fi
     if [ "$SKIP_FIRST_ARCHIVE" = "true" ]; then
-        options_info="${options_info}• skip_first_archive enabled\n"
+        options_info="${options_info}• skip_first_archive enabled"$'\n'
     fi
     if [ -z "$options_info" ]; then
-        options_info="• Simple capture (URL only) to reduce Internet Archive rate limits\n"
-    fi
-    fields="${fields},{\"name\":\"⚙️ Capture Options\",\"value\":\"$options_info\",\"inline\":false}"
-
-    if [ "$failed_count" -gt 0 ] && [ -n "$failed_details_json" ]; then
-        fields="${fields},{\"name\":\"⚠️ Failed URLs\",\"value\":\"$failed_details_json\",\"inline\":false}"
+        options_info="• Simple capture (URL only) to reduce Internet Archive rate limits"$'\n'
     fi
 
-    fields="${fields},{\"name\":\"📦 View All Snapshots\",\"value\":\"Click any domain link above to view its Wayback Machine calendar with all historical snapshots.\",\"inline\":false}]"
+    local payload_file
+    payload_file=$(mktemp /tmp/mas-discord-XXXXXX.json)
+    export MAS_CV2_WEBHOOK_URL="$DISCORD_WEBHOOK_URL"
+    export MAS_CV2_USE_CV2="$DISCORD_USE_CV2"
+    export MAS_CV2_SUCCESS_COUNT="$success_count"
+    export MAS_CV2_TOTAL_COUNT="$total_count"
+    export MAS_CV2_FAILED_COUNT="$failed_count"
+    export MAS_CV2_SKIPPED_COUNT="$skipped_count"
+    export MAS_CV2_FAILED_DETAILS="$failed_details_json"
+    export MAS_CV2_WEBSITES_LIST="$websites_list"
+    export MAS_CV2_CAPTURE_OPTIONS="$options_info"
+    export MAS_CV2_HERO_IMAGE_URL="$DISCORD_HERO_IMAGE_URL"
 
-    local payload
-    payload=$(cat <<EOF
-{
-  "embeds": [{
-    "title": "$status_emoji Internet Archive Snapshot Manager - $status_text",
-    "description": "Daily snapshot management completed at **$timestamp_display**",
-    "color": $color,
-    "fields": $fields,
-    "footer": {
-      "text": "Internet Archive Snapshot Manager v1.1 • newstargeted.com"
-    },
-    "timestamp": "$timestamp"
-  }]
+    python3 -c '
+import json, os, subprocess, sys
+payload = {
+    "webhook_url": os.environ.get("MAS_CV2_WEBHOOK_URL", ""),
+    "use_cv2": os.environ.get("MAS_CV2_USE_CV2", "true") == "true",
+    "success_count": int(os.environ.get("MAS_CV2_SUCCESS_COUNT", "0") or 0),
+    "total_count": int(os.environ.get("MAS_CV2_TOTAL_COUNT", "0") or 0),
+    "failed_count": int(os.environ.get("MAS_CV2_FAILED_COUNT", "0") or 0),
+    "skipped_count": int(os.environ.get("MAS_CV2_SKIPPED_COUNT", "0") or 0),
+    "failed_details": os.environ.get("MAS_CV2_FAILED_DETAILS", ""),
+    "websites_list": os.environ.get("MAS_CV2_WEBSITES_LIST", ""),
+    "capture_options": os.environ.get("MAS_CV2_CAPTURE_OPTIONS", ""),
+    "timezone": "Europe/Oslo",
+    "hero_image_url": os.environ.get("MAS_CV2_HERO_IMAGE_URL", ""),
+    "username": "Archive Snapshot Manager",
 }
-EOF
-)
+path = sys.argv[1]
+with open(path, "w", encoding="utf-8") as handle:
+    json.dump(payload, handle)
+' "$payload_file"
 
-    log_message "Sending Discord notification..."
-    local response http_code
-    response=$(curl -s -w "\n%{http_code}" \
-        -X POST \
-        -H "Content-Type: application/json" \
-        -d "$payload" \
-        "$DISCORD_WEBHOOK_URL")
-    http_code=$(echo "$response" | tail -n1)
-
-    if [ "$http_code" = "204" ] || [ "$http_code" = "200" ]; then
-        log_message "Discord notification sent successfully"
-    else
-        log_message "Failed to send Discord notification: HTTP $http_code"
+    log_message "Sending Discord notification (CV2)..."
+    if ! php "$SCRIPT_DIR/lib/discord_cv2_send.php" < "$payload_file"; then
+        rm -f "$payload_file"
+        log_message "Failed to send Discord notification"
+        return 1
     fi
+    rm -f "$payload_file"
+    log_message "Discord notification sent successfully"
 }
 
 main() {
     log_message "Starting daily website snapshot process"
     log_message "Date: $(date '+%Y-%m-%d %H:%M:%S %Z')"
     log_message "Domain mode: $DOMAIN_SELECTION_MODE (${#SNAPSHOT_URLS[@]} domains)"
+    log_message "Rate-limit policy: max ${MAX_RETRIES} POST per URL, no retry on 429/503, cooldown ${RATE_LIMIT_COOLDOWN_HOURS}h"
+
+    if is_rate_limited_cooldown; then
+        log_message "Run skipped: Internet Archive rate limit cooldown still active"
+        log_message "Daily snapshot process completed (cooldown)"
+        exit 0
+    fi
+
+    if ! preflight_archive_service; then
+        log_message "Daily snapshot process completed (preflight skip)"
+        exit 0
+    fi
 
     local success_count=0
     local skipped_count=0
@@ -453,6 +377,10 @@ main() {
         else
             failed_urls+=("$url")
             failed_reasons+=("${reason:-Unknown error}")
+            if [ "$RUN_HIT_RATE_LIMIT" -eq 1 ]; then
+                log_message "Aborting remaining URLs after rate limit (fail-safe)"
+                break
+            fi
         fi
 
         sleep "$DELAY_BETWEEN_REQUESTS"

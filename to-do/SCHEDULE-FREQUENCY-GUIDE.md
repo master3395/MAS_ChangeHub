@@ -190,6 +190,24 @@ Each run will send a separate Discord notification showing:
 - **Cons**: N/A
 - **Best for**: Staging sites, test environments
 
+## Internet Archive rate limits (June 2026)
+
+Daily cron uses **main domain only** (`DOMAIN_SELECTION_MODE=main`) and at most **one Save Page Now POST** per run when not skipped.
+
+The script avoids 429 retry storms:
+
+- No retries on HTTP 429 or 503 (`MAX_RETRIES_ON_RATE_LIMIT=0`)
+- Server-side dedup: `if_not_archived_within=20h` on every POST
+- CDX pre-check and local `last_success.txt` before POST
+- Preflight: `/save/status/system` and `/save/status/user`
+- 24h cooldown file after any rate limit hit
+
+Reference: [SPN2 API docs](https://gist.github.com/regstuff/82e690db2f1d91ba59f6681c1abad6cf), [Wayback Machine](https://web.archive.org/).
+
+Do not run `website_snapshot.sh` as root (breaks log permissions for user `newst3922`).
+
+Cron mail: set `MAILTO=""` in crontab; logging goes to `snapshot.log`.
+
 ## Troubleshooting
 
 ### Problem: Some snapshots are failing
@@ -198,6 +216,7 @@ Each run will send a separate Discord notification showing:
 ```bash
 # Check for 429 errors (rate limit)
 grep "HTTP 429" /home/MAS_ChangeHub/snapshot.log
+grep "Rate limit cooldown" /home/MAS_ChangeHub/snapshot.log | tail -5
 ```
 
 ### Problem: Too many Discord notifications

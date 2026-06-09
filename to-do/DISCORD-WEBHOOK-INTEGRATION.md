@@ -1,117 +1,87 @@
-# Discord Webhook Integration - Internet Archive Snapshot Manager
+# Discord Webhook Integration - Implementation Complete
 
 ## Overview
-Successfully integrated Discord webhook notifications into the Internet Archive Snapshot Manager system. The system now sends detailed status reports to Discord when snapshot operations complete.
+Successfully integrated Discord webhook notifications into the Contabo Snapshot Manager system. The system now sends detailed status reports to Discord when snapshot operations complete.
 
 ## Implementation Details
 
-### 1. Configuration (`snapshot_config.conf`)
+### 1. Configuration (`config.php`)
 Added Discord webhook configuration:
-```bash
-# Discord Webhook Configuration
-DISCORD_WEBHOOK_ENABLED=true
-DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_WEBHOOK_TOKEN"
+```php
+// Discord Webhook Configuration
+define('DISCORD_WEBHOOK_URL', 'https://discord.com/api/webhooks/1425241647532474481/VmIEYRBs8cR-IJWUbc1047v_M8AE_tyQ1sVE4M7iaz27PTK9gNfZM-v-ZAjusSR6HI6G');
+define('DISCORD_WEBHOOK_ENABLED', true);
 ```
 
-### 2. Main Script (`website_snapshot.sh`)
+### 2. Snapshot Manager (`snapshot-manager.php`)
 
-#### Added Discord Webhook Configuration
-The script now includes:
-- Discord webhook URL
-- Enable/disable flag
-- Full webhook integration in bash
+#### Added Statistics Tracking
+The system now tracks:
+- Number of instances processed
+- Number of snapshots created
+- Number of snapshots deleted
+- Number of errors encountered
 
-#### New Function: `send_discord_notification()`
+#### New Method: `sendDiscordNotification()`
 Sends rich embed notifications to Discord with:
 - **Status**: Success (green) or Error (red)
-- **Statistics**: Total websites, successful/failed snapshots
-- **Website Details**: List of monitored domains
-- **Archive Location**: Link to archive.org
-- **Failed URLs**: List of any failed snapshots (if applicable)
+- **Statistics**: All operation counts
+- **Instance Details**: List of processed instances
 - **Timestamp**: Oslo timezone (GMT+2)
+- **Error Information**: Link to error log if errors occurred
 
-#### Enhanced Main Function
-Updated `main()` to:
-- Track success and failure counts
-- Build failed URLs list for Discord
-- Call `send_discord_notification()` on completion
+#### Enhanced Methods
+Updated the following methods to track statistics:
+- `run()`: Increments instances processed, triggers notification on completion
+- `deleteSnapshot()`: Increments deletion counter or error counter
+- `createSnapshot()`: Increments creation counter or error counter
 
-### 3. Test Script (`test-discord-webhook.sh`)
+### 3. Test Script (`test-discord-webhook.php`)
 Created comprehensive test script that:
 - Validates webhook configuration
 - Sends test notification with sample data
 - Verifies webhook connectivity
 - Provides clear success/error feedback
 
-### 4. Documentation (`to-do/README.md`)
+### 4. Documentation (`README.md`)
 Updated README with:
 - Discord webhook feature in features list
 - Configuration instructions
 - Test command for webhook verification
-- Schedule change from 00:00 to 23:00 GMT+2
-
-## Schedule Change
-
-### Old Schedule
-- **Time**: 00:00 (midnight) GMT+2
-- **Conflict**: Ran at the same time as Contabo snapshots
-
-### New Schedule
-- **Time**: 23:00 (11:00 PM) GMT+2
-- **Benefit**: Runs 1 hour before Contabo snapshots
-- **Reason**: Ensures Internet Archive snapshots are captured before VM snapshots
 
 ## Notification Content
 
 ### Success Notification (Green)
 ```
-✅ Internet Archive Snapshot Manager - Completed Successfully
-Daily snapshot management completed at 2025-10-08 23:00:15 CEST
+✅ Contabo Snapshot Manager - Completed Successfully
+Daily snapshot management completed at 2025-10-08 00:00:15 CEST
 
 📊 Statistics
-Total Websites: 15
-Successful Snapshots: 15
-Failed Snapshots: 0
+Instances Processed: 1
+Snapshots Created: 1
+Snapshots Deleted: 1
+Errors: 0
 
-🌐 Websites Archived
-• newstargeted.com - Main domain (clickable Wayback Machine link)
-• api.newstargeted.com (clickable Wayback Machine link)
-• infoskjerm.newstargeted.com (clickable Wayback Machine link)
-• mas.newstargeted.com (clickable Wayback Machine link)
-• discord.newstargeted.com (clickable Wayback Machine link)
-• and 10 more domains...
-
-📦 View All Snapshots
-Click any domain link above to view its Wayback Machine calendar with all historical snapshots.
+🖥️ Instances
+• newstargeted.com (ID: 202441688)
 ```
-
-**Each domain is a clickable link** to its Wayback Machine calendar:
-- Example: https://web.archive.org/web/*/https://newstargeted.com/
-- Example: https://web.archive.org/web/*/https://api.newstargeted.com/
 
 ### Error Notification (Red)
 ```
-❌ Internet Archive Snapshot Manager - Completed with Errors
-Daily snapshot management completed at 2025-10-08 23:00:15 CEST
+❌ Contabo Snapshot Manager - Completed with Errors
+Daily snapshot management completed at 2025-10-08 00:00:15 CEST
 
 📊 Statistics
-Total Websites: 15
-Successful Snapshots: 14
-Failed Snapshots: 1
+Instances Processed: 1
+Snapshots Created: 0
+Snapshots Deleted: 0
+Errors: 2
 
-🌐 Websites Archived
-• newstargeted.com - Main domain (clickable Wayback Machine link)
-• api.newstargeted.com (clickable Wayback Machine link)
-• infoskjerm.newstargeted.com (clickable Wayback Machine link)
-• mas.newstargeted.com (clickable Wayback Machine link)
-• discord.newstargeted.com (clickable Wayback Machine link)
-• and 10 more domains...
+🖥️ Instances
+• newstargeted.com (ID: 202441688)
 
-⚠️ Failed URLs
-• https://webhook.newstargeted.com
-
-📦 View All Snapshots
-Click any domain link above to view its Wayback Machine calendar with all historical snapshots.
+⚠️ Error Notice
+Check the error log for details: /home/contabo-snapshots/logs/snapshot-errors.log
 ```
 
 ## Testing Results
@@ -120,79 +90,52 @@ Click any domain link above to view its Wayback Machine calendar with all histor
 - HTTP Status: 204 (No Content - Success)
 - Webhook URL: Validated and working
 - Rich embed formatting: Correct
-- No bash script errors
-
-## Cron Job Configuration
-
-### Current Cron Jobs
-```bash
-# Internet Archive snapshots (23:00 GMT+2)
-0 23 * * * /home/MAS_ChangeHub/website_snapshot.sh >> /home/MAS_ChangeHub/snapshot.log 2>&1
-
-# Contabo VM snapshots (00:00 GMT+2)
-0 0 * * * /usr/bin/php /home/contabo-snapshots/snapshot-manager.php >> /home/contabo-snapshots/logs/cron.log 2>&1
-```
-
-### Schedule Timeline
-```
-22:00 - (preparation)
-23:00 - Internet Archive snapshots START
-23:15 - Internet Archive snapshots COMPLETE (estimated)
-00:00 - Contabo VM snapshots START
-00:15 - Contabo VM snapshots COMPLETE (estimated)
-```
+- No PHP notices or errors
 
 ## File Permissions
 
 All files have correct ownership and permissions:
 ```bash
--rwxr-xr-x. 1 root root    website_snapshot.sh
--rwxr-xr-x. 1 root root    test-discord-webhook.sh
--rw-r--r--. 1 root root    snapshot_config.conf
+-rw-r--r--. 1 newst3922 newst3922    config.php
+-rwxr-xr-x. 1 newst3922 newst3922    snapshot-manager.php
+-rwxr-xr-x. 1 newst3922 newst3922    test-discord-webhook.php
 ```
 
 ## Security Considerations
 
 ✅ **Implemented**:
 - No sensitive data in webhook messages
-- Webhook URL stored in config file
+- Webhook URL stored securely in config.php
+- Config file protected from direct web access
 - Proper error handling for webhook failures
 - No use of `await=true` parameter (per user rules)
-- SSL/TLS enabled for webhook requests
-- API credentials not exposed in notifications
+- SSL/TLS verification enabled for webhook requests
 
 ## Usage
 
 ### Test Webhook
 ```bash
-cd /home/MAS_ChangeHub
-./test-discord-webhook.sh
+php /home/contabo-snapshots/test-discord-webhook.php
 ```
 
 ### Disable Webhook
-Edit `/home/MAS_ChangeHub/snapshot_config.conf`:
-```bash
-DISCORD_WEBHOOK_ENABLED=false
+Edit `/home/contabo-snapshots/config.php`:
+```php
+define('DISCORD_WEBHOOK_ENABLED', false);
 ```
 
 ### Change Webhook URL
-Edit `/home/MAS_ChangeHub/snapshot_config.conf`:
-```bash
-DISCORD_WEBHOOK_URL="your-new-webhook-url-here"
-```
-
-### Manual Run
-```bash
-/home/MAS_ChangeHub/website_snapshot.sh
+Edit `/home/contabo-snapshots/config.php`:
+```php
+define('DISCORD_WEBHOOK_URL', 'your-new-webhook-url-here');
 ```
 
 ## Next Scheduled Run
 
 The cron job will run at:
-- **Time**: 23:00 (11:00 PM)
+- **Time**: 00:00 (midnight)
 - **Timezone**: Europe/Oslo (GMT+2)
 - **Frequency**: Daily
-- **Next run**: Tonight at 23:00
 
 The next notification will be sent automatically when the cron job completes.
 
@@ -200,86 +143,19 @@ The next notification will be sent automatically when the cron job completes.
 
 You can verify webhook notifications by:
 1. Checking Discord channel for messages
-2. Reviewing logs: `/home/MAS_ChangeHub/snapshot.log`
-3. Running test script: `./test-discord-webhook.sh`
-4. Checking webhook errors in log files
-
-## Comparison with Contabo Snapshots
-
-### Internet Archive Snapshots (23:00)
-- **What**: Website content snapshots
-- **Where**: archive.org (Internet Archive)
-- **Type**: HTML/webpage snapshots
-- **Purpose**: Preserve website content publicly
-- **Retention**: Permanent on archive.org
-- **Discord Channel**: Same webhook as Contabo
-
-### Contabo Snapshots (00:00)
-- **What**: Virtual machine snapshots
-- **Where**: Contabo infrastructure
-- **Type**: Full VM disk snapshots
-- **Purpose**: System backup and recovery
-- **Retention**: 3 snapshots (rotating)
-- **Discord Channel**: Same webhook
+2. Reviewing logs: `/home/contabo-snapshots/logs/snapshot-manager.log`
+3. Checking for webhook errors in the log files
 
 ## Changelog
 
 ### Version 1.1 (2025-10-08)
 - ✅ Added Discord webhook integration
-- ✅ Changed schedule from 00:00 to 23:00 GMT+2
+- ✅ Added statistics tracking
 - ✅ Created test script for webhook validation
-- ✅ Enhanced status reporting with Discord embeds
-- ✅ Added dynamic Wayback Machine calendar links for each domain
 - ✅ Updated documentation
-- ✅ Moved README.md to to-do folder
-
-### Version 1.0 (2025-10-07)
-- Initial implementation
-- Daily snapshot automation
-- Internet Archive integration
-- Comprehensive logging
-- Status monitoring
-
-## Features Highlight
-
-### Dynamic Wayback Machine Links
-Each domain in the Discord notification is a **clickable link** to its own Wayback Machine calendar:
-
-- **newstargeted.com** → `https://web.archive.org/web/*/https://newstargeted.com/`
-- **api.newstargeted.com** → `https://web.archive.org/web/*/https://api.newstargeted.com/`
-- **infoskjerm.newstargeted.com** → `https://web.archive.org/web/*/https://infoskjerm.newstargeted.com/`
-- **mas.newstargeted.com** → `https://web.archive.org/web/*/https://mas.newstargeted.com/`
-- **discord.newstargeted.com** → `https://web.archive.org/web/*/https://discord.newstargeted.com/`
-
-This makes it easy to:
-- View historical snapshots for any specific domain
-- See snapshot calendar for each sub-domain
-- Track archiving history per domain
-- Share specific domain archives with others
-
-### Scalability
-If you add more domains to snapshot in the future, they will automatically:
-- Get their own Wayback Machine calendar link
-- Show up in the Discord notification
-- Be trackable individually
+- ✅ Fixed PHP notice about CONTABO_SNAPSHOT_INIT constant
 
 ## Status: COMPLETE ✅
 
-All features implemented and tested successfully. The system is ready for production use with:
-- Discord notifications enabled with dynamic domain links
-- New schedule (23:00 GMT+2)
-- 1 hour separation from Contabo snapshots
-- Full webhook integration tested and working
-- Individual Wayback Machine calendar links for each domain
-
-## Next Steps
-
-The system will automatically:
-1. Run at 23:00 GMT+2 tonight
-2. Create snapshots of all 15 websites
-3. Send Discord notification on completion
-4. Log all activity to snapshot.log
-5. Run 1 hour before Contabo VM snapshots
-
-No further action required. The system is fully automated.
+All features implemented and tested successfully. The system is ready for production use with Discord notifications enabled.
 
