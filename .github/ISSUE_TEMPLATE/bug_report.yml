@@ -1,12 +1,13 @@
 name: Bug report
 description: Something is broken in archive snapshots, Contabo, Discord, or the menu
 title: "[Bug]: "
-labels: ["bug"]
+labels:
+  - bug
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for reporting a bug. Do not paste API keys, webhook URLs, or `config.php` contents.
+        Thanks for reporting a bug. Do not paste API keys, webhook URLs, or config.php contents.
 
   - type: dropdown
     id: area
@@ -45,8 +46,6 @@ body:
     attributes:
       label: Release or commit
       placeholder: e.g. v2.0.0 or git sha
-    validations:
-      required: false
 
   - type: dropdown
     id: os
@@ -64,7 +63,5 @@ body:
     id: logs
     attributes:
       label: Relevant log excerpt
-      description: Redact secrets. Paths: logs/snapshot.log, contabo/logs/
+      description: Redact secrets. Paths include logs/snapshot.log and contabo/logs/
       render: bash
-    validations:
-      required: false
