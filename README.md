@@ -17,7 +17,7 @@ Unified snapshot tooling for **[NewsTargeted](https://newstargeted.com)**: Inter
 - [Quick start](#quick-start)
 - [Requirements](#requirements)
 - [Project layout](#project-layout)
-- [Migrating from contabo-snapshots](#migrating-from-contabo-snapshots)
+- [SSH commands](#ssh-commands)
 - [Discord notifications](#discord-notifications)
 - [Changelog announcements](#changelog-announcements)
 - [Tests](#tests)
@@ -81,7 +81,7 @@ cd MAS_ChangeHub
 
 1. Copy `contabo/config.php.example` to `contabo/config.php` (`chmod 600`).
 2. Set Contabo API credentials and Discord webhook URL.
-3. Run `php contabo/snapshot-manager.php` or menu option **11**.
+3. Run `php /home/MAS_ChangeHub/contabo/snapshot-manager.php` or menu option **11**.
 
 ### Cron (example)
 
@@ -95,22 +95,29 @@ cd MAS_ChangeHub
 
 ---
 
-## Migrating from contabo-snapshots
+## SSH commands
 
-The standalone `/home/contabo-snapshots` tree is **retired**. Use MAS ChangeHub paths instead.
-
-| Task | Old path | New path |
-|------|----------|----------|
-| **Run Contabo snapshots** | `php /home/contabo-snapshots/snapshot-manager.php` | `php /home/MAS_ChangeHub/contabo/snapshot-manager.php` |
-| **Cron** | `php /home/contabo-snapshots/snapshot-manager.php` | `/usr/bin/php /home/MAS_ChangeHub/contabo/snapshot-manager.php` |
-| **Config** | `/home/contabo-snapshots/config.php` | `/home/MAS_ChangeHub/contabo/config.php` |
-| **Logs** | `/home/contabo-snapshots/logs/` | `/home/MAS_ChangeHub/contabo/logs/` |
-| **Setup cron** | `/home/contabo-snapshots/setup-cron.sh` | `/home/MAS_ChangeHub/contabo/setup-cron.sh` |
-
-Clone or pull this repo to `/home/MAS_ChangeHub` (or your deploy path), copy `contabo/config.php.example` to `contabo/config.php`, then run:
+Run these on the server after `git clone` or `git pull` into `/home/MAS_ChangeHub`:
 
 ```bash
+# Contabo VPS snapshots (manual)
 php /home/MAS_ChangeHub/contabo/snapshot-manager.php
+
+# Internet Archive snapshots (manual)
+/home/MAS_ChangeHub/website_snapshot.sh
+
+# Interactive menu (archive, Contabo, cron, tests)
+cd /home/MAS_ChangeHub && ./menu.sh
+
+# Install or refresh Contabo cron
+/home/MAS_ChangeHub/contabo/setup-cron.sh
+
+# Changelog announcement to Discord
+cd /home/MAS_ChangeHub/changelog-announcement && ./bin/announce-changelog send --channel=changehub
+
+# Tail logs
+tail -f /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
+tail -f /home/MAS_ChangeHub/logs/snapshot.log
 ```
 
 ---

@@ -42,7 +42,6 @@ layout: default
   <div class="nt-card">
     <p class="nt-card-title">Contabo VPS</p>
     <p class="nt-card-entry"><code>php /home/MAS_ChangeHub/contabo/snapshot-manager.php</code></p>
-    <p class="nt-card-note">Replaces <code>/home/contabo-snapshots/snapshot-manager.php</code></p>
     <a href="{{ site.repo_blob_base }}/guides/CONTABO-README.md">Contabo guide</a>
   </div>
   <div class="nt-card">
@@ -60,12 +59,20 @@ layout: default
 ## Quick start
 
 ```bash
-git clone https://github.com/master3395/MAS_ChangeHub.git
-cd MAS_ChangeHub
+git clone https://github.com/master3395/MAS_ChangeHub.git /home/MAS_ChangeHub
+cd /home/MAS_ChangeHub
 cp config/snapshot_config.conf.example config/snapshot_config.conf
 cp contabo/config.php.example contabo/config.php
 chmod 600 config/snapshot_config.conf contabo/config.php
 ./menu.sh
+```
+
+## SSH commands
+
+```bash
+php /home/MAS_ChangeHub/contabo/snapshot-manager.php
+/home/MAS_ChangeHub/website_snapshot.sh
+cd /home/MAS_ChangeHub && ./menu.sh
 ```
 
 ## Documentation index
