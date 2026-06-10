@@ -10,7 +10,7 @@ MAS ChangeHub uses Discord **Components V2** for both Internet Archive and Conta
 DISCORD_WEBHOOK_ENABLED=true
 DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/..."
 DISCORD_USE_CV2=true
-DISCORD_HERO_IMAGE_URL="https://newstargeted.com/assets/status-cv2/archive.png"
+DISCORD_HERO_IMAGE_URL="https://newstargeted.com/assets/status-cv2/archive.png?v=2"
 ```
 
 ### Contabo (`contabo/config.php`)

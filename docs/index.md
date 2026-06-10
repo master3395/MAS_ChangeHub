@@ -41,13 +41,19 @@ layout: default
   </div>
   <div class="nt-card">
     <p class="nt-card-title">Contabo VPS</p>
-    <p class="nt-card-entry"><code>contabo/snapshot-manager.php</code></p>
+    <p class="nt-card-entry"><code>php /home/MAS_ChangeHub/contabo/snapshot-manager.php</code></p>
+    <p class="nt-card-note">Replaces <code>/home/contabo-snapshots/snapshot-manager.php</code></p>
     <a href="{{ site.repo_blob_base }}/guides/CONTABO-README.md">Contabo guide</a>
   </div>
   <div class="nt-card">
     <p class="nt-card-title">Discord CV2</p>
     <p class="nt-card-entry"><code>lib/discord_cv2_*</code></p>
     <a href="{{ site.repo_blob_base }}/guides/DISCORD-CV2-INTEGRATION.md">CV2 guide</a>
+  </div>
+  <div class="nt-card">
+    <p class="nt-card-title">Changelog-Announcement</p>
+    <p class="nt-card-entry"><code>changelog-announcement/bin/announce-changelog</code></p>
+    <a href="{{ site.repo_blob_base }}/changelog-announcement/to-do/README.md">Announce guide</a>
   </div>
 </div>
 

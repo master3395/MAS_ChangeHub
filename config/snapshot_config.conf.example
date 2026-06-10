@@ -44,7 +44,7 @@ DISCORD_NOTIFY_ON_FAILURE_ONLY=true
 DISCORD_NOTIFY_ON_SUCCESS=false
 DISCORD_WEBHOOK_URL=""
 DISCORD_USE_CV2=true
-DISCORD_HERO_IMAGE_URL="https://newstargeted.com/assets/status-cv2/archive.png"
+DISCORD_HERO_IMAGE_URL="https://newstargeted.com/assets/status-cv2/archive.png?v=2"
 
 # ═══════════════════════════════════════════════════════════════════════
 # SCHEDULE CONFIGURATION

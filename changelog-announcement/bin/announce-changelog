@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# announce-changelog: thin wrapper around cli.php.
+#
+# Usage:
+#   ./bin/announce-changelog list
+#   ./bin/announce-changelog preview --channel=webhook-proxy
+#   ./bin/announce-changelog send    --channel=webhook-proxy --version=4.0.10
+#
+# The wrapper picks up any *.env file next to it (key=value lines) so secrets
+# can be sourced without touching the system environment for the user shell.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+CLI="$ROOT_DIR/cli.php"
+
+if [[ ! -f "$CLI" ]]; then
+  echo "announce-changelog: cli.php not found at $CLI" >&2
+  exit 2
+fi
+
+# Optional local env file (NOT committed). Used to inject WEBHOOK URLs/roles
+# without editing config.php on every host.
+if [[ -f "$SCRIPT_DIR/announce-changelog.env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  . "$SCRIPT_DIR/announce-changelog.env"
+  set +a
+fi
+
+PHP_BIN="${PHP_BIN:-/usr/bin/php}"
+exec "$PHP_BIN" "$CLI" "$@"

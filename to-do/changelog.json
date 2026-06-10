@@ -1,0 +1,55 @@
+{
+  "project": "MAS_ChangeHub",
+  "entries": [
+    {
+      "version": "2.0.1",
+      "date": "2026-06-10",
+      "time": "03:45",
+      "type": "patch",
+      "title": "MAS ChangeHub v2.0.1: Changelog-Announcement merge and Internet Archive hero image",
+      "summary": "Changelog-Announcement now lives inside MAS_ChangeHub. Internet Archive Discord CV2 webhooks use the real Wayback Machine logo instead of the IA placeholder.",
+      "scope": "changelog-announcement/, to-do/changelog.json, lib/discord_notify_archive.php, newstargeted.com/assets/status-cv2/archive.png",
+      "operator": "cd /home/MAS_ChangeHub/changelog-announcement && ./bin/announce-changelog send --channel=changehub",
+      "categories": {
+        "Added": [
+          "changelog-announcement/ module (Discord Components V2 changelog broadcaster)",
+          "to-do/changelog.json and changehub channel for release announcements",
+          "archive-src.png source asset for the Wayback hero image"
+        ],
+        "Changed": [
+          "Internet Archive CV2 thumbnail uses archive.png?v=2 (Wayback logo on orange)",
+          "Retired standalone /home/Changelog-Announcement; use /home/MAS_ChangeHub/changelog-announcement",
+          "Contabo snapshot manager path: php /home/MAS_ChangeHub/contabo/snapshot-manager.php (replaces /home/contabo-snapshots/snapshot-manager.php)"
+        ],
+        "Removed": [
+          "/home/Changelog-Announcement folder (merged into this repo)",
+          "/home/contabo-snapshots (retired; see archive/contabo-snapshots-legacy on server)"
+        ]
+      },
+      "notes": [
+        "Announce: ./changelog-announcement/bin/announce-changelog send --channel=changehub",
+        "Contabo cron: 0 1 * * * /usr/bin/php /home/MAS_ChangeHub/contabo/snapshot-manager.php"
+      ]
+    },
+    {
+      "version": "2.0.0",
+      "date": "2026-06-09",
+      "time": "12:00",
+      "type": "major",
+      "title": "MAS ChangeHub v2.0.0: Unified Internet Archive and Contabo snapshot tooling",
+      "summary": "Single repository for Wayback Machine website snapshots and Contabo VPS instance snapshots with Discord Components V2 status webhooks.",
+      "scope": "website_snapshot.sh, contabo/snapshot-manager.php, lib/discord_cv2_*, menu.sh",
+      "categories": {
+        "Added": [
+          "Unified MAS_ChangeHub repository on GitHub (master3395/MAS_ChangeHub)",
+          "Interactive menu.sh for archive, Contabo, cron, and tests",
+          "Discord CV2 layouts for archive and Contabo run reports",
+          "GitHub Pages docs at master3395.github.io/MAS_ChangeHub"
+        ],
+        "Changed": [
+          "Contabo tooling moved from /home/contabo-snapshots to /home/MAS_ChangeHub/contabo"
+        ]
+      }
+    }
+  ]
+}

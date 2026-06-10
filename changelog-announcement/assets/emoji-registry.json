@@ -1,0 +1,26 @@
+{
+  "_note": "Maps logical emoji names -> Discord application emoji ids. application_emoji_id is filled in by `cli.php sync-emojis` after upload. Until then, the renderer falls back to the Unicode `fallback` glyph so the layout still works.",
+  "_icons8_credit": "https://icons8.com (Fluent Systems Filled). Local PNGs become bot/app-owned application emojis once uploaded.",
+  "_categories_note": "Entries with an empty local_file render as their Unicode fallback. Drop a 32x32 white PNG into assets/icons8/<name>.png, fill in icons8_id/icons8_name, then re-run `cli.php sync-emojis`.",
+
+  "emojis": {
+
+    "_section": "Identity / framing",
+    "nt_workflow":      { "icons8_id": "jO04AMoNyDYN", "icons8_name": "Workflow",      "icons8_platform": "fluent-systems-filled", "local_file": "assets/icons8/nt_workflow.png",      "application_emoji_id": "", "usage": "Title and changelog identity",        "fallback": "🛰️"  },
+    "nt_settings":      { "icons8_id": "Zydyx4gBcOrY", "icons8_name": "Settings",      "icons8_platform": "fluent-systems-filled", "local_file": "assets/icons8/nt_settings.png",      "application_emoji_id": "", "usage": "Generic operational changes / operator notes", "fallback": "⚙️"   },
+    "nt_verified":      { "icons8_id": "TUfmJDlYw1B4", "icons8_name": "Done",          "icons8_platform": "fluent-systems-filled", "local_file": "assets/icons8/nt_verified.png",      "application_emoji_id": "", "usage": "Verification / post-deploy checks",     "fallback": "✅"    },
+
+    "_section_buttons": "Buttons",
+    "nt_download":      { "icons8_id": "aO3W9kKC9PMv", "icons8_name": "Download",      "icons8_platform": "fluent-systems-filled", "local_file": "assets/icons8/nt_download.png",      "application_emoji_id": "", "usage": "View Full Changelog button",            "fallback": "📥"    },
+    "nt_internal_link": { "icons8_id": "o90MnZhnB2CM", "icons8_name": "External Link", "icons8_platform": "fluent-systems-filled", "local_file": "assets/icons8/nt_internal_link.png", "application_emoji_id": "", "usage": "Internal NewsTargeted links (Visit Site, Jump to vX)", "fallback": "🔗" },
+
+    "_section_categories": "Changelog category headers (Added/Changed/Fixed/Removed/Security/Deprecated/Performance). Drop matching PNGs into assets/icons8/<name>.png to swap from Unicode fallback to an application emoji.",
+    "nt_added":         { "icons8_id": "9pXfniCWGqlk", "icons8_name": "Plus",          "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Added",       "fallback": "➕" },
+    "nt_changed":       { "icons8_id": "84R02XzkmaqW", "icons8_name": "Synchronize",   "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Changed",     "fallback": "🔄" },
+    "nt_fixed":         { "icons8_id": "FBycKqdjkrhx", "icons8_name": "Wrench",        "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Fixed",       "fallback": "🔧" },
+    "nt_removed":       { "icons8_id": "UqcXP3DTU8c8", "icons8_name": "Trash",         "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Removed",     "fallback": "🗑️" },
+    "nt_security":      { "icons8_id": "FMK5LRkjLOAh", "icons8_name": "Shield",        "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Security",    "fallback": "🛡️" },
+    "nt_deprecated":    { "icons8_id": "1XLxz2bHX9CN", "icons8_name": "Error",         "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Deprecated",  "fallback": "⚠️" },
+    "nt_performance":   { "icons8_id": "rqrIfobItYUI", "icons8_name": "Rocket",        "icons8_platform": "fluent-systems-filled", "local_file": "", "application_emoji_id": "", "usage": "Category: Performance", "fallback": "🚀" }
+  }
+}

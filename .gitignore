@@ -3,6 +3,10 @@ config/snapshot_config.conf
 config.php
 contabo/config.php
 contabo/logs/
+changelog-announcement/config.php
+changelog-announcement/bin/announce-changelog.env
+changelog-announcement/logs/*
+!changelog-announcement/logs/.gitkeep
 
 # Retired standalone Contabo tree (archived on server, not in repo)
 archive/contabo-snapshots-legacy-*/

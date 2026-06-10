@@ -1,0 +1,446 @@
+<?php
+/**
+ * Changelog Announcement: configuration + channel registry.
+ *
+ * Secrets live ONLY in this file (and the per-project config.php files this
+ * adapter can read). Never commit real webhook URLs or database passwords.
+ * File mode should be 600 and HTTP access is denied via .htaccess.
+ *
+ * Channels: each entry binds a logical name (e.g. "webhook-proxy") to one
+ * source adapter (where the changelog rows live) and one Discord webhook
+ * (where announcements get posted). Add new channels by appending to the
+ * 'channels' array; nothing else needs editing.
+ */
+
+declare(strict_types=1);
+
+if (!defined('CHANGELOG_ANNOUNCEMENT_APP_INIT')) {
+    http_response_code(404);
+    header('Content-Type: text/plain; charset=utf-8');
+    header('X-Robots-Tag: noindex, nofollow');
+    echo "Not found.\n";
+    exit;
+}
+
+/**
+ * Read an env var, fall back to a default. Trimmed.
+ *
+ * @template T
+ * @param string $name
+ * @param T      $default
+ * @return T|string
+ */
+function changelog_announcement_env(string $name, $default = '')
+{
+    $value = getenv($name);
+    if ($value === false || $value === null) {
+        return $default;
+    }
+    $trimmed = trim((string) $value);
+    return $trimmed === '' ? $default : $trimmed;
+}
+
+/**
+ * Return the project root for this tool (one directory above config.php).
+ */
+function changelog_announcement_project_root(): string
+{
+    return __DIR__;
+}
+
+/**
+ * Read a single getter from a remote project's config.php.
+ *
+ * Each newstargeted project has its own config.php that defines a function
+ * like getWebhookConfig() or returns an array. We isolate the include into a
+ * subprocess so we do not pollute this process with its constants.
+ *
+ * @return string Trimmed value, or '' on any failure.
+ */
+function changelog_announcement_read_project_value(string $configPhpPath, string $getterCall): string
+{
+    if ($configPhpPath === '' || !is_readable($configPhpPath)) {
+        return '';
+    }
+    $php = 'require ' . var_export($configPhpPath, true) . '; echo (string) ' . $getterCall . ';';
+    $cmd = '/usr/bin/php -r ' . escapeshellarg($php) . ' 2>/dev/null';
+    $out = @shell_exec($cmd);
+    if (!is_string($out)) {
+        return '';
+    }
+    return trim($out);
+}
+
+/**
+ * Helper: read a comma-separated env var into an array (trimmed, no empties).
+ * @return array<int,string>
+ */
+function changelog_announcement_env_list(string $name): array
+{
+    $raw = changelog_announcement_env($name, '');
+    if ($raw === '') return [];
+    $out = [];
+    foreach (preg_split('/\s*,\s*/', (string) $raw) as $part) {
+        $part = trim((string) $part);
+        if ($part !== '') $out[] = $part;
+    }
+    return $out;
+}
+
+return [
+    // ====================================================================
+    // GLOBAL DEFAULTS
+    // ====================================================================
+    'defaults' => [
+        // Used by every channel unless the channel overrides them.
+        'avatar_url'      => changelog_announcement_env(
+            'CHANGELOG_ANNOUNCEMENT_AVATAR',
+            'https://newstargeted.com/assets/logo.png'
+        ),
+        'username'        => 'Changelog Announcer',
+        'accent_color'    => 0x00E5FF,   // neon cyan (futuristic)
+        'badge_color'     => 0xFF00CC,   // neon magenta accent (used in body separator)
+        'http_timeout_s'  => 12,
+        'http_retries'    => 3,
+        'http_retry_ms'   => 1500,
+        'send_with_wait'  => true,
+        'log_dir'         => __DIR__ . '/logs',
+        'announcement_log_file' => __DIR__ . '/logs/announcements.jsonl',
+        // Where the emoji registry JSON lives. The registry maps logical
+        // names (e.g. nt_workflow) to Discord application emoji IDs once
+        // they have been uploaded via `cli.php sync-emojis`.
+        'emoji_registry_file'   => __DIR__ . '/assets/emoji-registry.json',
+        'promo_site_url'        => 'https://newstargeted.com/',
+    ],
+
+    // ====================================================================
+    // DISCORD APPLICATION (for application emoji upload only)
+    // ====================================================================
+    // App emojis must be created against a specific Discord application.
+    // The bot token can come from an env var or a sibling project's
+    // config.php; never hardcode it here.
+    'discord_app' => [
+        'app_id'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DISCORD_APP_ID', ''),
+        'bot_token' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DISCORD_BOT_TOKEN', ''),
+    ],
+
+    // ====================================================================
+    // CHANNELS
+    // Each entry binds: source (where) -> webhook (where to)
+    // ====================================================================
+    'channels' => [
+        // -------------------------------------------------------------- 
+        // 1. Webhook proxy changelog (MariaDB-backed)
+        // -------------------------------------------------------------- 
+        'webhook-proxy' => [
+            'label'        => 'NewsTargeted Webhook Proxy',
+            'project_tag'  => 'webhook.newstargeted.com',
+            'public_url'   => 'https://webhook.newstargeted.com/changelog',
+            'site_url'     => 'https://webhook.newstargeted.com/',
+            // Webhook URL(s): accepts a single URL or CSV. webhook_urls below
+            // can list more for fan-out to several Discord channels.
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_URL',
+                changelog_announcement_read_project_value(
+                    '/home/newstargeted.com/webhook.newstargeted.com/config.php',
+                    "getWebhookConfig('CHANGELOG_ANNOUNCE_WEBHOOK_URL', '')"
+                )
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_URLS'),
+            // Branding (per channel). All optional.
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_NAME', 'NewsTargeted Webhook Proxy'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_AVATAR', ''),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_THUMB', ''),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_FOOTER', ''),
+            // Singular still supported for back-compat; prefer the plural
+            // arrays below when you want multi-role / multi-user pings.
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_ROLE',
+                '617517540125442087' // existing @Notify role used by NT Bot Changelog
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_USERS', ''))
+            ))),
+            'source' => [
+                'type'      => 'mariadb',
+                'host_from' => "getWebhookConfig('DATABASE_HOST','127.0.0.1')",
+                'port_from' => "getWebhookConfig('DATABASE_PORT','3306')",
+                'user_from' => "getWebhookConfig('DATABASE_USER','')",
+                'pass_from' => "getWebhookConfig('DATABASE_PASSWORD','')",
+                'name_from' => "getWebhookConfig('DATABASE_NAME','')",
+                'config_php' => '/home/newstargeted.com/webhook.newstargeted.com/config.php',
+                'table'     => 'changelog_entries',
+                // Column map: rename if your schema differs. The adapter
+                // emits the canonical { version, release_date, title, html,
+                // badge_type } structure for the renderer.
+                'columns'   => [
+                    'version'      => 'version',
+                    'release_date' => 'release_date',
+                    'title'        => 'title',
+                    'html'         => 'content',
+                    'badge_type'   => 'badge_type',
+                ],
+            ],
+        ],
+
+        // -------------------------------------------------------------- 
+        // 2. Dashboard changelog (JSON file)
+        // -------------------------------------------------------------- 
+        'dashboard' => [
+            'label'        => 'NewsTargeted Dashboard',
+            'project_tag'  => 'dashboard.newstargeted.com',
+            'public_url'   => 'https://dashboard.newstargeted.com/changelog',
+            'site_url'     => 'https://dashboard.newstargeted.com/',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_DASHBOARD_URL',
+                ''
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_DASHBOARD_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_NAME', 'NewsTargeted Dashboard'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_AVATAR', ''),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_THUMB', ''),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_DASHBOARD_ROLE',
+                ''
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DASHBOARD_USERS', ''))
+            ))),
+            'source' => [
+                'type' => 'json',
+                'path' => '/home/newstargeted.com/dashboard.newstargeted.com/nt/extensions/dashboard_EXT/data/changelog.json',
+                // For JSON-based changelogs the renderer reads categories.
+                'list_key'     => 'entries',
+                'version_key'  => 'version',
+                'date_key'     => 'date',
+                'title_key'    => 'title',
+                'type_key'     => 'type',
+                'category_key' => 'categories', // {Added: [...], Changed: [...], Fixed: [...]}
+            ],
+        ],
+
+        // -------------------------------------------------------------- 
+        // 3. Public API changelog (HTTPS JSON feed)
+        // -------------------------------------------------------------- 
+        'api' => [
+            'label'        => 'NewsTargeted API',
+            'project_tag'  => 'api.newstargeted.com',
+            'public_url'   => 'https://api.newstargeted.com/changelog',
+            'site_url'     => 'https://api.newstargeted.com/',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_API_URL',
+                ''
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_API_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_NAME', 'NewsTargeted API'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_AVATAR', ''),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_THUMB', ''),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_API_ROLE',
+                ''
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_API_USERS', ''))
+            ))),
+            'source' => [
+                'type'        => 'http',
+                'url'         => 'https://api.newstargeted.com/changelog.json',
+                'list_key'    => 'entries',
+                'version_key' => 'version',
+                'date_key'    => 'release_date',
+                'title_key'   => 'title',
+                'html_key'    => 'content',
+            ],
+        ],
+
+        // -------------------------------------------------------------- 
+        // 5. OrbitAdmin changelog (JSON file alongside the markdown one)
+        // -------------------------------------------------------------- 
+        'orbitadmin' => [
+            'label'        => 'OrbitAdmin',
+            'project_tag'  => 'OrbitAdmin',
+            'public_url'   => 'https://test.newstargeted.com/OrbitAdmin/',
+            'site_url'     => 'https://github.com/master3395/OrbitAdmin',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_ORBITADMIN_URL',
+                ''
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_NAME', 'OrbitAdmin'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_AVATAR', ''),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_THUMB', ''),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_ORBITADMIN_ROLE',
+                ''
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_ORBITADMIN_USERS', ''))
+            ))),
+            'source' => [
+                'type'        => 'json',
+                'path'        => '/home/newstargeted.com/test.newstargeted.com/OrbitAdmin/to-do/changelog.json',
+                'list_key'    => 'entries',
+                'version_key' => 'version',
+                'date_key'    => 'date',
+                'title_key'   => 'title',
+                'type_key'    => 'type',
+                'category_key' => 'categories',
+            ],
+        ],
+
+
+        // -------------------------------------------------------------- 
+        // 6. DiabetesTech Hub (JSON file in project to-do/)
+        // -------------------------------------------------------------- 
+        'diabetes' => [
+            'label'        => 'DiabetesTech Hub',
+            'project_tag'  => 'diabetes.newstargeted.com',
+            'public_url'   => 'https://diabetes.newstargeted.com/changelog',
+            'site_url'     => 'https://diabetes.newstargeted.com/',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_DIABETES_URL',
+                changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_WEBHOOK_PROXY_URL', '')
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_DIABETES_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_NAME', 'DiabetesTech Hub'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_AVATAR', 'https://diabetes.newstargeted.com/images/logo.png'),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_LOGO', 'https://diabetes.newstargeted.com/images/logo.png'),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_THUMB', 'https://diabetes.newstargeted.com/images/logo.png'),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_DIABETES_ROLE',
+                '617517540125442087'
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_DIABETES_USERS', ''))
+            ))),
+            'source' => [
+                'type'         => 'json',
+                'path'         => '/home/newstargeted.com/diabetes.newstargeted.com/to-do/changelog.json',
+                'list_key'     => 'entries',
+                'version_key'  => 'version',
+                'date_key'     => 'date',
+                'title_key'    => 'title',
+                'type_key'     => 'type',
+                'category_key' => 'categories',
+            ],
+        ],
+
+        // -------------------------------------------------------------- 
+        // 4. NT-main bot changelog (also HTTPS JSON, public)
+        // -------------------------------------------------------------- 
+        'bot' => [
+            'label'        => 'NT-main Discord Bot',
+            'project_tag'  => 'NT-main',
+            'public_url'   => 'https://newstargeted.com/news-targeted-bot-help',
+            'site_url'     => 'https://newstargeted.com/news-targeted-bot',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_BOT_URL',
+                ''
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_BOT_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_NAME', 'NT-main Bot'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_AVATAR', ''),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_THUMB', ''),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_BOT_ROLE',
+                '617517540125442087' // existing @Notify role used by NT Bot Changelog
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_BOT_USERS', ''))
+            ))),
+            'source' => [
+                'type'        => 'json',
+                'path'        => '/home/newstargeted.com/dashboard.newstargeted.com/nt/extensions/dashboard_EXT/data/changelog.json',
+                'list_key'    => 'entries',
+                'version_key' => 'version',
+                'date_key'    => 'date',
+                'title_key'   => 'title',
+                'type_key'    => 'type',
+                'category_key' => 'categories',
+            ],
+        ],
+
+        // -------------------------------------------------------------- 
+        // 7. MAS ChangeHub (JSON file in project to-do/)
+        // -------------------------------------------------------------- 
+        'changehub' => [
+            'label'        => 'MAS ChangeHub',
+            'project_tag'  => 'MAS_ChangeHub',
+            'public_url'   => 'https://github.com/master3395/MAS_ChangeHub/releases',
+            'site_url'     => 'https://master3395.github.io/MAS_ChangeHub/',
+            'webhook_url'  => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_CHANGEHUB_URL',
+                ''
+            ),
+            'webhook_urls' => changelog_announcement_env_list('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_URLS'),
+            'webhook_username' => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_NAME', 'MAS ChangeHub'),
+            'avatar_url'       => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_AVATAR', 'https://newstargeted.com/assets/logo.png'),
+            'logo_url'         => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_LOGO', ''),
+            'thumbnail_url'    => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_THUMB', 'https://newstargeted.com/assets/status-cv2/archive.png?v=2'),
+            'footer_message'   => changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_FOOTER', ''),
+            'notify_role_id' => changelog_announcement_env(
+                'CHANGELOG_ANNOUNCEMENT_CHANGEHUB_ROLE',
+                '617517540125442087'
+            ),
+            'notify_role_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_ROLES', ''))
+            ))),
+            'notify_user_ids' => array_values(array_filter(array_map(
+                'trim',
+                explode(',', (string) changelog_announcement_env('CHANGELOG_ANNOUNCEMENT_CHANGEHUB_USERS', ''))
+            ))),
+            'source' => [
+                'type'         => 'json',
+                'path'         => '/home/MAS_ChangeHub/to-do/changelog.json',
+                'list_key'     => 'entries',
+                'version_key'  => 'version',
+                'date_key'     => 'date',
+                'title_key'    => 'title',
+                'type_key'     => 'type',
+                'category_key' => 'categories',
+            ],
+        ],
+    ],
+];
+

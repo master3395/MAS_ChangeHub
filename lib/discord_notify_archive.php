@@ -22,7 +22,7 @@ function discord_notify_archive_send(array $options)
     $websitesList = (string) ($options['websites_list'] ?? '');
     $captureOptions = (string) ($options['capture_options'] ?? '');
     $timezone = $options['timezone'] ?? 'Europe/Oslo';
-    $heroImage = $options['hero_image_url'] ?? 'https://newstargeted.com/assets/status-cv2/archive.png';
+    $heroImage = $options['hero_image_url'] ?? 'https://newstargeted.com/assets/status-cv2/archive.png?v=2';
     $promoBot = $options['promo_bot_url'] ?? 'https://newstargeted.com/news-targeted-bot';
     $promoSite = $options['promo_site_url'] ?? 'https://newstargeted.com/';
 
