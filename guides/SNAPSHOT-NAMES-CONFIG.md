@@ -1,6 +1,6 @@
 # Snapshot names (config.php)
 
-Edit `/home/contabo-snapshots/config.php` only. No code changes needed for renames.
+Edit `/home/MAS_ChangeHub/contabo/config.php` only. No code changes needed for renames.
 
 ## Default list (3 snapshots)
 
@@ -31,7 +31,7 @@ When set for a display name, that list replaces `SNAPSHOT_NAMES` for that instan
 ## Fix existing wrong names
 
 ```bash
-cd /home/contabo-snapshots
+cd /home/MAS_ChangeHub/contabo
 php fix-snapshot-names.php
 ```
 

@@ -81,7 +81,7 @@ Errors: 2
 • newstargeted.com (ID: 202441688)
 
 ⚠️ Error Notice
-Check the error log for details: /home/contabo-snapshots/logs/snapshot-errors.log
+Check the error log for details: /home/MAS_ChangeHub/contabo/logs/snapshot-errors.log
 ```
 
 ## Testing Results
@@ -115,17 +115,17 @@ All files have correct ownership and permissions:
 
 ### Test Webhook
 ```bash
-php /home/contabo-snapshots/test-discord-webhook.php
+php /home/MAS_ChangeHub/contabo/test-discord-webhook.php
 ```
 
 ### Disable Webhook
-Edit `/home/contabo-snapshots/config.php`:
+Edit `/home/MAS_ChangeHub/contabo/config.php`:
 ```php
 define('DISCORD_WEBHOOK_ENABLED', false);
 ```
 
 ### Change Webhook URL
-Edit `/home/contabo-snapshots/config.php`:
+Edit `/home/MAS_ChangeHub/contabo/config.php`:
 ```php
 define('DISCORD_WEBHOOK_URL', 'your-new-webhook-url-here');
 ```
@@ -143,7 +143,7 @@ The next notification will be sent automatically when the cron job completes.
 
 You can verify webhook notifications by:
 1. Checking Discord channel for messages
-2. Reviewing logs: `/home/contabo-snapshots/logs/snapshot-manager.log`
+2. Reviewing logs: `/home/MAS_ChangeHub/contabo/logs/snapshot-manager.log`
 3. Checking for webhook errors in the log files
 
 ## Changelog

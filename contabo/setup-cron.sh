@@ -23,10 +23,10 @@ chown -R newst3922:newst3922 /home/MAS_ChangeHub/contabo
 CRON_ENTRY="0 0 * * * /usr/bin/php /home/MAS_ChangeHub/contabo/snapshot-manager.php >> /home/MAS_ChangeHub/contabo/logs/cron.log 2>&1"
 
 # Check if cron job already exists
-if crontab -l 2>/dev/null | grep -q "contabo-snapshots"; then
+if crontab -l 2>/dev/null | grep -q "MAS_ChangeHub/contabo/snapshot-manager.php"; then
     echo "Cron job already exists. Updating..."
     # Remove existing entry
-    crontab -l 2>/dev/null | grep -v "contabo-snapshots" | crontab -
+    crontab -l 2>/dev/null | grep -v "MAS_ChangeHub/contabo/snapshot-manager.php" | crontab -
 fi
 
 # Add new cron job

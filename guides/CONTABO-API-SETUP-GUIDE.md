@@ -20,7 +20,7 @@ The API authentication is failing with "Invalid user credentials" error. This me
 3. Note down the **API User email** and **API password**
 
 ### 4. Update Configuration
-Once you have the correct API credentials, update `/home/contabo-snapshots/config.php`:
+Once you have the correct API credentials, update `/home/MAS_ChangeHub/contabo/config.php`:
 
 ```php
 define('CONTABO_API_USER', 'your-actual-api-user-email@example.com');
@@ -39,7 +39,7 @@ define('CONTABO_API_PASSWORD', 'your-actual-api-password');
 Once you've updated the credentials, test with:
 
 ```bash
-cd /home/contabo-snapshots
+cd /home/MAS_ChangeHub/contabo
 php test-credentials.php
 ```
 

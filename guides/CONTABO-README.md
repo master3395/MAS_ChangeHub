@@ -23,7 +23,7 @@ The script manages snapshots for these specific instances:
 
 ### 1. Update Credentials
 
-Edit `/home/contabo-snapshots/config.php` and update:
+Edit `/home/MAS_ChangeHub/contabo/config.php` and update:
 
 ```php
 define('CONTABO_API_USER', 'your-email@example.com'); // Your Contabo login email
@@ -55,19 +55,19 @@ The webhook sends notifications when snapshot operations complete, including:
 
 1. **Set up the cron job**:
    ```bash
-   chmod +x /home/contabo-snapshots/setup-cron.sh
-   /home/contabo-snapshots/setup-cron.sh
+   chmod +x /home/MAS_ChangeHub/contabo/setup-cron.sh
+   /home/MAS_ChangeHub/contabo/setup-cron.sh
    ```
 
 2. **Test the installation**:
    ```bash
-   chmod +x /home/contabo-snapshots/test-snapshots.sh
-   /home/contabo-snapshots/test-snapshots.sh
+   chmod +x /home/MAS_ChangeHub/contabo/test-snapshots.sh
+   /home/MAS_ChangeHub/contabo/test-snapshots.sh
    ```
 
 3. **Test Discord webhook (optional)**:
    ```bash
-   php /home/contabo-snapshots/test-discord-webhook.php
+   php /home/MAS_ChangeHub/contabo/test-discord-webhook.php
    ```
 
 ## Usage
@@ -76,7 +76,7 @@ The webhook sends notifications when snapshot operations complete, including:
 
 Run the snapshot manager manually:
 ```bash
-php /home/contabo-snapshots/snapshot-manager.php
+php /home/MAS_ChangeHub/contabo/snapshot-manager.php
 ```
 
 ### Automated Execution
@@ -87,21 +87,21 @@ The cron job runs automatically every day at 00:00 GMT+2 (Europe/Oslo timezone).
 
 ### Log Files
 
-- **Main Log**: `/home/contabo-snapshots/logs/snapshot-manager.log`
-- **Error Log**: `/home/contabo-snapshots/logs/snapshot-errors.log`
-- **Cron Log**: `/home/contabo-snapshots/logs/cron.log`
+- **Main Log**: `/home/MAS_ChangeHub/contabo/logs/snapshot-manager.log`
+- **Error Log**: `/home/MAS_ChangeHub/contabo/logs/snapshot-errors.log`
+- **Cron Log**: `/home/MAS_ChangeHub/contabo/logs/cron.log`
 
 ### View Logs
 
 ```bash
 # View main log
-tail -f /home/contabo-snapshots/logs/snapshot-manager.log
+tail -f /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 # View error log
-tail -f /home/contabo-snapshots/logs/snapshot-errors.log
+tail -f /home/MAS_ChangeHub/contabo/logs/snapshot-errors.log
 
 # View recent activity
-tail -n 50 /home/contabo-snapshots/logs/snapshot-manager.log
+tail -n 50 /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 ```
 
 ## Configuration Options
@@ -132,7 +132,7 @@ define('INSTANCE_NAMES', [
 
 The cron job is configured as:
 ```
-0 0 * * * /usr/bin/php /home/contabo-snapshots/snapshot-manager.php >> /home/contabo-snapshots/logs/cron.log 2>&1
+0 0 * * * /usr/bin/php /home/MAS_ChangeHub/contabo/snapshot-manager.php >> /home/MAS_ChangeHub/contabo/logs/cron.log 2>&1
 ```
 
 This runs:
@@ -156,8 +156,8 @@ This runs:
    - Ensure instances are in the correct region
 
 3. **Permission Denied**
-   - Check file permissions: `ls -la /home/contabo-snapshots/`
-   - Ensure proper ownership: `chown -R newst3922:newst3922 /home/contabo-snapshots/`
+   - Check file permissions: `ls -la /home/MAS_ChangeHub/contabo/`
+   - Ensure proper ownership: `chown -R newst3922:newst3922 /home/MAS_ChangeHub/contabo/`
 
 4. **PHP Errors**
    - Check PHP version: `php -v`
@@ -168,7 +168,7 @@ This runs:
 
 For detailed debugging, run with error reporting:
 ```bash
-php -d display_errors=1 /home/contabo-snapshots/snapshot-manager.php
+php -d display_errors=1 /home/MAS_ChangeHub/contabo/snapshot-manager.php
 ```
 
 ## Security

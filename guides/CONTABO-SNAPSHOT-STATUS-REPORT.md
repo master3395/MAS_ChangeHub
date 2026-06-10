@@ -28,9 +28,9 @@ The Contabo snapshot system is **working perfectly** and has been successfully c
 
 ### ✅ Logging System
 - **Status:** WORKING
-- **Main Log:** `/home/contabo-snapshots/logs/snapshot-manager.log`
-- **Error Log:** `/home/contabo-snapshots/logs/snapshot-errors.log`
-- **Cron Log:** `/home/contabo-snapshots/logs/cron.log`
+- **Main Log:** `/home/MAS_ChangeHub/contabo/logs/snapshot-manager.log`
+- **Error Log:** `/home/MAS_ChangeHub/contabo/logs/snapshot-errors.log`
+- **Cron Log:** `/home/MAS_ChangeHub/contabo/logs/cron.log`
 
 ## Historical Performance
 
@@ -68,7 +68,7 @@ define('DISCORD_WEBHOOK_ENABLED', true);
 ### Cron Job Configuration
 ```bash
 # Registered in root crontab
-0 1 * * * /usr/bin/php /home/contabo-snapshots/snapshot-manager.php >> /home/contabo-snapshots/logs/cron.log 2>&1
+0 1 * * * /usr/bin/php /home/MAS_ChangeHub/contabo/snapshot-manager.php >> /home/MAS_ChangeHub/contabo/logs/cron.log 2>&1
 ```
 
 **Schedule:** Daily at 01:00 CEST (GMT+2)  
@@ -79,7 +79,7 @@ define('DISCORD_WEBHOOK_ENABLED', true);
 
 ### Directory Structure
 ```
-/home/contabo-snapshots/
+/home/MAS_ChangeHub/contabo/
 ├── config.php (600, newst3922:newst3922) ✅ SECURE
 ├── snapshot-manager.php (644, newst3922:newst3922) ✅
 ├── *.sh files (755, newst3922:newst3922) ✅
@@ -107,19 +107,19 @@ define('DISCORD_WEBHOOK_ENABLED', true);
 ### Log Monitoring Commands
 ```bash
 # View recent activity
-tail -n 50 /home/contabo-snapshots/logs/snapshot-manager.log
+tail -n 50 /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 # Monitor live operations
-tail -f /home/contabo-snapshots/logs/snapshot-manager.log
+tail -f /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 # Check for errors
-tail -n 20 /home/contabo-snapshots/logs/snapshot-errors.log
+tail -n 20 /home/MAS_ChangeHub/contabo/logs/snapshot-errors.log
 ```
 
 ### Manual Testing
 ```bash
 # Test system manually
-cd /home/contabo-snapshots
+cd /home/MAS_ChangeHub/contabo
 php snapshot-manager.php
 
 # Verify cron job

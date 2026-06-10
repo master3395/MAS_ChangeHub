@@ -5,7 +5,7 @@
 
 📝 CONFIGURATION FILE LOCATION
 ═══════════════════════════════
-/home/contabo-snapshots/config.php
+/home/MAS_ChangeHub/contabo/config.php
 
 
 ═══════════════════════════════════════════════════════════════════════
@@ -14,7 +14,7 @@ HOW TO CHANGE THE SNAPSHOT TIME
 
 STEP 1: Edit config.php
 ────────────────────────
-nano /home/contabo-snapshots/config.php
+nano /home/MAS_ChangeHub/contabo/config.php
 
 STEP 2: Change SNAPSHOT_TIME
 ─────────────────────────────
@@ -30,7 +30,7 @@ Examples:
 
 STEP 3: Apply the Configuration
 ────────────────────────────────
-cd /home/contabo-snapshots
+cd /home/MAS_ChangeHub/contabo
 ./archive/apply_config_schedule.sh
 
 DONE! ✅ The cron job is automatically updated.
@@ -60,18 +60,18 @@ QUICK COMMANDS
 ═══════════════════════════════════════════════════════════════════════
 
 View Current Schedule:
-  crontab -l | grep contabo-snapshots
+  crontab -l | grep MAS_ChangeHub/contabo
 
 Edit Schedule:
-  nano /home/contabo-snapshots/config.php
+  nano /home/MAS_ChangeHub/contabo/config.php
   # Change SNAPSHOT_TIME
   ./archive/apply_config_schedule.sh
 
 View Logs:
-  tail -f /home/contabo-snapshots/logs/snapshot-manager.log
+  tail -f /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 Test Run Now:
-  cd /home/contabo-snapshots
+  cd /home/MAS_ChangeHub/contabo
   php snapshot-manager.php
 
 
@@ -108,7 +108,7 @@ EXAMPLES
 
 Example 1: Change to 2:00 AM
 ────────────────────────────
-1. nano /home/contabo-snapshots/config.php
+1. nano /home/MAS_ChangeHub/contabo/config.php
 2. Change: define('SNAPSHOT_TIME', '02:00');
 3. Save and exit (Ctrl+X, Y, Enter)
 4. Run: ./archive/apply_config_schedule.sh
@@ -118,7 +118,7 @@ Result: Contabo snapshots will run at 02:00 GMT+2
 
 Example 2: Change to 3:30 AM
 ────────────────────────────
-1. nano /home/contabo-snapshots/config.php
+1. nano /home/MAS_ChangeHub/contabo/config.php
 2. Change: define('SNAPSHOT_TIME', '03:30');
 3. Save and exit
 4. Run: ./archive/apply_config_schedule.sh
@@ -152,7 +152,7 @@ Check Cron Job:
   crontab -l | grep contabo
 
 View Recent Logs:
-  tail -50 /home/contabo-snapshots/logs/snapshot-manager.log
+  tail -50 /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 Check Discord:
   You'll receive a notification after each successful snapshot
@@ -168,7 +168,7 @@ TROUBLESHOOTING
 
 Problem: Schedule not changing
 Solution: Make sure AUTO_APPLY_SCHEDULE is true and run apply script
-  grep "AUTO_APPLY_SCHEDULE" /home/contabo-snapshots/config.php
+  grep "AUTO_APPLY_SCHEDULE" /home/MAS_ChangeHub/contabo/config.php
   ./archive/apply_config_schedule.sh
 
 Problem: Cron not running
@@ -178,7 +178,7 @@ Solution: Check cron service
 
 Problem: Snapshots not appearing
 Solution: Check logs for errors
-  tail -100 /home/contabo-snapshots/logs/snapshot-manager.log
+  tail -100 /home/MAS_ChangeHub/contabo/logs/snapshot-manager.log
 
 
 ═══════════════════════════════════════════════════════════════════════
@@ -205,9 +205,9 @@ Internet Archive:
   Apply: cd /home/archive-snapshots && ./archive/apply_config_schedule.sh
 
 Contabo VM:
-  Config: /home/contabo-snapshots/config.php
+  Config: /home/MAS_ChangeHub/contabo/config.php
   Time: 01:00 GMT+2
-  Apply: cd /home/contabo-snapshots && ./archive/apply_config_schedule.sh
+  Apply: cd /home/MAS_ChangeHub/contabo && ./archive/apply_config_schedule.sh
 
 
 ════════════════════════════════════════════════════════════════════════
